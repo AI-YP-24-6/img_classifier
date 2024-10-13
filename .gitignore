@@ -131,3 +131,5 @@ cython_debug/
 /.idea/misc.xml
 /.idea/vcs.xml
 /.idea/img_classifier.iml
+
+/Notebooks/goskatalog_art/
