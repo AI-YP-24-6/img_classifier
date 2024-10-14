@@ -133,3 +133,4 @@ cython_debug/
 /.idea/img_classifier.iml
 
 /Notebooks/goskatalog_art/
+*.zip
