@@ -19,6 +19,10 @@ isort = "^5.13.2"
 black = "^24.10.0"
 flake8 = "^7.1.1"
 pre-commit = "^4.0.1"
+mkdocs-material = "~9.5.41"
+mkdocstrings = { extras = ["python"], version = "^0.26.2" }
+griffe-typingdoc = "^0.2.7"
+mkdocs-jupyter = "^0.25.1"
 
 
 [build-system]
