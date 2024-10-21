@@ -4,7 +4,7 @@ from pathlib import Path
 
 def set_cell_id(notebook_path: str | Path) -> int:
     """
-    Обновляет идентификаторы ячейек в файле ноутбука от 1 до N
+    Обновляет идентификаторы ячеек в файле ноутбука от 1 до N
     :param notebook_path: путь к файлу ipynb
     :return: 1 - файл обновлен
     """
