@@ -4,7 +4,7 @@
 type: example
 
 ```python
---8 < -- "./Tools/download.py"
+--8<-- "./Tools/download.py"
 ```
 
 ///
@@ -13,8 +13,5 @@ type: example
 options:
 heading_level: 3
 
-```python
---8 < -- "./Doc/hooks.py"
-```
 
 ::: Tools.download

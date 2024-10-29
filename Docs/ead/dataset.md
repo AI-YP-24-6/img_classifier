@@ -10,6 +10,6 @@ c [Kaggle.com](https://www.kaggle.com) и спаршен 1 валидацион�
   полный [анализ датасета](analysis.md#vegetable-image-dataset)
 
 - [Климашевский Илья Алексеевич](https://github.com/Ilya-Klim) — [Fruit classification(10 Class)](https://www.kaggle.com/datasets/karimabdulnabi/fruit-classification10-class)
-  полный [анализ датасета](./analysis.md#fruit-classification)
+  полный [анализ датасета](analysis.md#fruit-classification)
 - [Мевший Илья Павлович](https://github.com/milia20) — создание проверочного датасета
-  путем [парсинга](./parser.md) сайта goskatalog.ru
+  путем [парсинга](parser.md) сайта goskatalog.ru

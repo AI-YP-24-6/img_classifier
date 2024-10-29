@@ -1,6 +1,7 @@
 site_name: Image classifier AI 24
 repo_url: https://github.com/AI-YP-24-6/img_classifier
 site_url: https://img-classifier.org/
+custom_dir: Docs
 
 theme:
     name: material
@@ -27,9 +28,6 @@ theme:
         - content.code.select
         - content.code.annotate
 
-hooks:
-    - hooks.py
-
 markdown_extensions:
     - attr_list
     - admonition
@@ -43,7 +41,7 @@ markdown_extensions:
             pygments_lang_class: true
     - pymdownx.inlinehilite
     -   pymdownx.snippets:
-            base_path: [ '..' ]
+            base_path: [ '.' ]
     #        base_path: !relative $config_dir # Relative to the root directory with mkdocs.yml
     - pymdownx.superfences
     - pymdownx.tilde
