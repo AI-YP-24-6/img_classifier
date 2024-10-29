@@ -131,3 +131,6 @@ cython_debug/
 /.idea/misc.xml
 /.idea/vcs.xml
 /.idea/img_classifier.iml
+
+# OS generated files
+.DS_Store
