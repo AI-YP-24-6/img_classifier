@@ -1,11 +1,11 @@
 site_name: Image classifier AI 24
 repo_url: https://github.com/AI-YP-24-6/img_classifier
 site_url: https://img-classifier.org/
-custom_dir: Docs
 
 theme:
     name: material
     language: ru
+    custom_dir: Docs
     icon:
         repo: fontawesome/brands/github
     palette:

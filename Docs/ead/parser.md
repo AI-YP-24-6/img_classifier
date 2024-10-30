@@ -17,15 +17,61 @@
 
 ## Сбор данных
 
+Для создания датасета мы использовали api методы:
+передаваемые параметры для каждого запроса:
+```json
+[{
+    "fieldName": "name",
+    "fieldType": "String",
+    "operator": "CONTAINS",
+    "fromValue": "null",
+    "toValue": "null",
+    "value": слово фильтра поиска
+},
+{
+    "fieldName": "typologyId",
+    "fieldType": "Number",
+    "operator": "EQUALS",
+    "fromValue": "null",
+    "toValue": "null",
+    "value": 1
+}]
 ```
---8<-- "./Notebooks/parser.ipynb"
+Из этого Post метода мы получаем количество картин на сайте с такими параметрами поиска, чтобы рекурсивно загружать по 100 изображений за запрос.
+```python
+post_url = "https://goskatalog.ru/muzfo-rest/rest/exhibits/ext"
+post_count_params = {
+    "statusIds": 6,
+    "publicationLimit": "false",
+    "cacheEnabled": "true",
+    "calcCountsType": 1,
+    "limit": 0,
+    "offset": 0,
+}
 ```
+Получить список картин можно по следующему запросу:
+```python
+post_url = "https://goskatalog.ru/muzfo-rest/rest/exhibits/ext"
+post_params = {
+    "statusIds": 6,
+    "publicationLimit": "false",
+    "cacheEnabled": "true",
+    "calcCountsType": 0,
+    "dirFields": "desc",
+    "limit": 100,
+    "offset": сдвиг,
+    "sortFields": "id",
+}
+```
+Запросы для получения данных картин и изображение самого большого изображения:
+```python
+data_url = f"https://goskatalog.ru/muzfo-rest/rest/exhibits/{id картины}"
+image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{id фотографии}?originalName={оригинальное название картины}"
+```
+## Запуск парсера
+Запускаем парсер, вызывая функцию парсера [Tools.parser.goskatalog_parser()](../tools.md#Tools.parser.goskatalog_parser)
+Сам парсер вызывает [Tools.parser.download_art()](../tools.md#Tools.parser.download_art) для каждого изображения.
 
-::: Tools.download.get_ya_disk_url
-options:
-show_source: false
-show_docstring_attributes: false
-show_symbol_type_heading: false
-separate_signature: false
+После мы архивируем результат запроса [Tools.parser.zip_files()](../tools.md#Tools.parser.zip_files) в zip архив и загружаем его на яндекс диск.
 
-Dataset: [yandex-disk](https://disk.yandex.ru/d/bzb677Qx_d6aeg)
+Dataset: ссылка на [yandex-disk](https://disk.yandex.ru/d/bzb677Qx_d6aeg)
