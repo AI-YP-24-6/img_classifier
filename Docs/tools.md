@@ -17,3 +17,8 @@
     options:
         heading_level: 3
         docstring_section_style: spacy
+
+::: Tools.analysis
+    options:
+        heading_level: 3
+        docstring_section_style: spacy
