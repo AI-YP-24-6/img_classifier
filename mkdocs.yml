@@ -1,0 +1,93 @@
+site_name: Image classifier AI 24
+repo_url: https://github.com/AI-YP-24-6/img_classifier
+site_url: https://img-classifier.org/
+
+theme:
+    name: material
+    language: ru
+    custom_dir: Docs
+    icon:
+        repo: fontawesome/brands/github
+    palette:
+        -   media: "(prefers-color-scheme)"
+            toggle:
+                icon: material/brightness-auto
+                name: Switch to light mode
+        -   media: "(prefers-color-scheme: light)"
+            scheme: default
+            toggle:
+                icon: material/brightness-7
+                name: Switch to dark mode
+        -   media: "(prefers-color-scheme: dark)"
+            scheme: slate
+            toggle:
+                icon: material/brightness-4
+                name: Switch to auto mode
+    features:
+        - content.code.copy
+        - content.code.select
+        - content.code.annotate
+
+markdown_extensions:
+    - attr_list
+    - admonition
+    - pymdownx.details
+    - md_in_html
+    -   pymdownx.emoji:
+            emoji_index: !!python/name:material.extensions.emoji.twemoji
+            emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    -   pymdownx.highlight:
+            anchor_linenums: true
+            pygments_lang_class: true
+    - pymdownx.inlinehilite
+    -   pymdownx.snippets:
+            base_path: [ '.' ]
+    #        base_path: !relative $config_dir # Relative to the root directory with mkdocs.yml
+    - pymdownx.superfences
+    - pymdownx.tilde
+    - pymdownx.tabbed
+    - pymdownx.tasklist
+
+plugins:
+    -   search:
+            lang: [ ru, en ]
+    -   mkdocstrings:
+            handlers:
+                python:
+                    selection:
+                        new_path_syntax: true
+                    options:
+                        # extensions:
+                        #   - griffe_typingdoc
+                        show_root_heading: true
+                        show_if_no_docstring: true
+                        show_docstring_attributes: true
+                        inherited_members: true
+                        members_order: source
+                        separate_signature: true
+                        unwrap_annotated: true
+                        filters: [ '!^_' ]
+                        merge_init_into_class: true
+                        docstring_style: sphinx
+                        docstring_section_style: list
+                        signature_crossrefs: true
+                        show_symbol_type_heading: true
+                        show_symbol_type_toc: true
+    -   mkdocs-jupyter:
+            execute: false
+            include_requirejs: true
+
+
+nav:
+    -   Начало: index.md
+    -   Исследовательский анализ:
+            -   Сбор данных: ead/dataset.md
+            -   Парсинг: ead/parser.md
+            -   Анализ данных:
+                    -   Анализ Fruits360: ead/analysis.md
+                    -   Анализ goskatalog_art: goskatalog.ipynb
+                    -   Анализ tasty_fruit: ead/analysis.md
+    -   Телеграм бот: tg_bot.md
+    -   Документация модулей:
+            -   Tools: tools.md
+    -   О проекте: about.md
