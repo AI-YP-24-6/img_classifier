@@ -145,8 +145,11 @@ cython_debug/
 /.idea/vcs.xml
 /.idea/img_classifier.iml
 
-/Notebooks/goskatalog_art/
-*.zip
 
 # OS generated files
 .DS_Store
+
+# image datasets
+/Notebooks/goskatalog_art/
+*.zip
+/EDA/dataset/
