@@ -74,4 +74,28 @@ image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{id ф
 
 После мы архивируем результат запроса [Tools.parser.zip_files()](../tools.md#Tools.parser.zip_files) в zip архив и загружаем его на яндекс диск.
 
-Dataset: ссылка на [yandex-disk](https://disk.yandex.ru/d/bzb677Qx_d6aeg)
+Список всех классов на русском языке из других датасетов, которые парсили:
+
+    "Яблоко",
+    "Апельсин",
+    "Ананас",
+    "Клубник",
+    "Банан",
+    "Арбуз",
+    "Тыква",
+    "Капуста",
+    "Морковь",
+    "Цветная капуста",
+    "Помидор",
+    "Абрикос",
+    "Плоды кактуса",
+    "Дыня",
+    "кукуруза",
+    "лимоны",
+    "мандарин",
+    "Персики",
+    "Груша",
+
+Далее идет анализ датасета в [jupyter notebook](../goskatalog.ipynb).
+
+Dataset: ссылка на изначально собранный [yandex-disk](https://disk.yandex.ru/d/bzb677Qx_d6aeg)
