@@ -86,6 +86,7 @@ nav:
             -   Анализ данных:
                     -   Анализ Fruits360: ead/analysis.md
                     -   Анализ goskatalog_art: goskatalog.ipynb
+                    -   Анализ tasty_fruit: ead/analysis.md
     -   Телеграм бот: tg_bot.md
     -   Документация модулей:
             -   Tools: tools.md
