@@ -29,6 +29,7 @@ seaborn = "^0.13.2"
 gdown = "^5.2.0"
 exif = "^1.6.0"
 plotly = "^5.24.1"
+notebook = "^7.2.2"
 
 
 [build-system]
