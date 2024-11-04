@@ -81,12 +81,14 @@ plugins:
 nav:
     -   Начало: index.md
     -   Исследовательский анализ:
-            -   Сбор данных: ead/dataset.md
-            -   Парсинг: ead/parser.md
+            -   Сбор данных: eda/dataset.md
+            -   Парсинг: eda/parser.md
             -   Анализ данных:
-                    -   Анализ Fruits360: ead/analysis.md
-                    -   Анализ goskatalog_art: goskatalog.ipynb
-                    -   Анализ tasty_fruit: ead/analysis.md
+                    -   Анализ Fruits360: eda/EDA_Fruits360.md
+                    -   Анализ tasty_fruit: eda/EDA_tasty_fruit.md
+                    -   Анализ Vegetable Image Dataset: eda/EDA_Vegetables.md
+                    -   Анализ goskatalog_art: eda/goskatalog.ipynb
+
     -   Телеграм бот: tg_bot.md
     -   Документация модулей:
             -   Tools: tools.md

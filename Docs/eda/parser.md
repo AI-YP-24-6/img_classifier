@@ -96,6 +96,6 @@ image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{id ф
     "Персики",
     "Груша",
 
-Далее идет анализ датасета в [jupyter notebook](../goskatalog.ipynb).
+Далее идет анализ датасета в [jupyter notebook](./goskatalog.ipynb).
 
 Dataset: ссылка на изначально собранный [yandex-disk](https://disk.yandex.ru/d/bzb677Qx_d6aeg)
