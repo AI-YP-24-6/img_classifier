@@ -9,6 +9,7 @@ repos:
             -   id: check-yaml
                 exclude: (mkdocs.yml)
             -   id: check-added-large-files
+                args: ['--maxkb=33791']
             -   id: detect-private-key
             -   id: check-merge-conflict
             -   id: mixed-line-ending
@@ -26,3 +27,7 @@ repos:
         rev: 7.1.1
         hooks:
             -   id: flake8
+    -   repo: https://github.com/asottile/pyupgrade
+        rev: v3.3.1
+        hooks:
+            -   id: pyupgrade

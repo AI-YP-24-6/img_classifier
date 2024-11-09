@@ -36,8 +36,8 @@ ___
 
 Исследовательский анализ данных:
 
-* [сбор данных](ead/dataset.md)
-* [парсинг](ead/parser.md)
+* [сбор данных](eda/dataset.md)
+* [парсинг](eda/parser.md)
 
 ## Project layout
 

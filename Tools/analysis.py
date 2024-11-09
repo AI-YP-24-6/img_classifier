@@ -74,7 +74,7 @@ def get_image_json_info(path: str) -> dict:
     :return: Словарь с информацией о JSON-файле
     """
     try:
-        with open(path, "r", encoding="ascii") as file:
+        with open(path, encoding="ascii") as file:
             return json.load(file)
     except (UnicodeDecodeError, FileNotFoundError):
         return {}
