@@ -38,6 +38,7 @@ markdown_extensions:
             emoji_generator: !!python/name:material.extensions.emoji.to_svg
     -   pymdownx.highlight:
             anchor_linenums: true
+            line_spans: __span
             pygments_lang_class: true
     - pymdownx.inlinehilite
     -   pymdownx.snippets:
@@ -93,4 +94,5 @@ nav:
     -   Телеграм бот: tg_bot.md
     -   Документация модулей:
             -   Tools: tools.md
+            -   CI/CD: CI_CD.md
     -   О проекте: about.md
