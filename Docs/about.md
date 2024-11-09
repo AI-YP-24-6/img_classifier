@@ -3,7 +3,7 @@
 /// details | `download` Python module
 type: example
 
-```python
+``` python
 --8<-- "./Tools/download.py"
 ```
 

@@ -11,7 +11,7 @@ def set_cell_id(notebook_path: str | Path) -> int:
     if isinstance(notebook_path, str):
         notebook_path = Path(notebook_path)
 
-    with open(notebook_path, "rt", encoding="utf-8") as f_in:
+    with open(notebook_path, encoding="utf-8") as f_in:
         doc = json.load(f_in)
     cnt = 1
 
@@ -25,7 +25,7 @@ def set_cell_id(notebook_path: str | Path) -> int:
 
             cnt += 1
 
-    with open(notebook_path, "wt", encoding="utf-8") as f_out:
+    with open(notebook_path, "w", encoding="utf-8") as f_out:
         json.dump(doc, f_out, indent=1, ensure_ascii=False)
 
     return 1
