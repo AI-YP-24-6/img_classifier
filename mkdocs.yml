@@ -1,6 +1,6 @@
 site_name: Image classifier AI 24
 repo_url: https://github.com/AI-YP-24-6/img_classifier
-site_url: https://img-classifier.org/
+site_url: https://AI-YP-24-6.github.io/img_classifier/
 
 theme:
     name: material
