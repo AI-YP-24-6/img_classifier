@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
-def find_image_files(path: Path) -> list[str]:
+def find_image_files(directory: Path) -> list[str]:
     """
     Получение списка путей к jpeg-файлам в нужной директории
-    :param path: Путь к папке поиска
+    :param directory: Путь к папке поиска
     :return: Список путей к jpeg-файлам
     """
     jpeg_files = []
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith((".jpg", "JPG", "jpeg", "tif")):
                 full_path = os.path.join(root, file)
@@ -22,21 +22,22 @@ def find_image_files(path: Path) -> list[str]:
     return jpeg_files
 
 
-def find_needed_jpeg_files(path: Path, names: list[str | int]) -> list[str]:
+def find_needed_jpeg_files(directory: Path, target_names: list[str | int]) -> list[str]:
     """
     Поиск нужных jpeg-файлов в нужной директории
-    :param path: Путь к папке поиска
-    :param names: Список имен для поиска
+    :param directory: Путь к папке поиска
+    :param target_names: Список имен для поиска
     :return: Список путей к jpeg-файлам
     """
-    if not isinstance(names[0], str):
-        names = [str(name) for name in names]
-    jpeg_files = find_image_files(path)
+    if not isinstance(target_names[0], str):
+        target_names = [str(name) for name in target_names]
+    jpeg_files = find_image_files(directory)
     needed_jpeg_files = []
     for jpeg_file in jpeg_files:
-        for name in names:
+        for name in target_names:
             if name in jpeg_file:
                 needed_jpeg_files.append(jpeg_file)
+
     return needed_jpeg_files
 
 
