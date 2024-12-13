@@ -16,7 +16,7 @@ def find_image_files(directory: Path) -> list[str]:
     jpeg_files = []
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith((".jpg", "JPG", "jpeg", "tif")):
+            if file.endswith(("jpg", "JPG", "jpeg", "tif")):
                 full_path = os.path.join(root, file)
                 jpeg_files.append(full_path)
     return jpeg_files
@@ -24,7 +24,7 @@ def find_image_files(directory: Path) -> list[str]:
 
 def find_needed_jpeg_files(directory: Path, target_names: list[str | int]) -> list[str]:
     """
-    Поиск нужных jpeg-файлов в нужной директории
+    Поиск нужных jpeg-файлов в нужной директории по их id имени
     :param directory: Путь к папке поиска
     :param target_names: Список имен для поиска
     :return: Список путей к jpeg-файлам
