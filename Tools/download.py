@@ -13,8 +13,8 @@ def get_ya_disk_url(public_key: str) -> str:
     """
     base_url = "https://cloud-api.yandex.net/v1/disk/public/resources/download?"
 
-    final_url = base_url + urlencode(dict(public_key=public_key))
-    response = requests.get(final_url)
+    final_url = base_url + urlencode({"public_key": public_key})
+    response = requests.get(final_url, timeout=20)
     download_url = response.json()["href"]
     return download_url
 
@@ -25,7 +25,7 @@ def download_zip(url: str, path: str | Path) -> Path:
     :param path: место, куда нужно сохранить zip-файл
     :return: путь до загруженного разархивированного zip-файла
     """
-    response = requests.get(url)
+    response = requests.get(url, timeout=20)
     path = Path(path)
     return extract_zip(response.content, path)
 
@@ -38,6 +38,6 @@ def extract_zip(zip_file: bytes, destination_directory: Path) -> Path:
     """
     destination_directory.mkdir(parents=True, exist_ok=True)
 
-    file = zipfile.ZipFile(io.BytesIO(zip_file))
-    file.extractall(destination_directory)
+    with zipfile.ZipFile(io.BytesIO(zip_file)) as file:
+        file.extractall(destination_directory)
     return destination_directory
