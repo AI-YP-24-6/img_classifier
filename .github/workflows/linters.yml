@@ -20,20 +20,37 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-          cache: 'poetry'
+          python-version-file: "pyproject.toml"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.4.1
+        with:
+            virtualenvs-create: true
+            virtualenvs-in-project: true
+            virtualenvs-path: .venv
+            installer-parallel: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+            path: .venv
+            key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
 
       - name: Install dependencies
         run: |
-          poetry install
-          pip install pycodestyle pylint
+          poetry install pycodestyle pylint
 
       - name: Run pycodestyle
         run: |
-          pycodestyle . --statistics --max-line-length=120
+          poetry run pycodestyle . --statistics --max-line-length=120
         continue-on-error: true
 
       - name: Run Pylint
         run: |
-          pylint . --max-line-length=120 "--disable=C0103,C0114,C0115"
+          poetry run pylint . --max-line-length=120 "--disable=C0103,C0114,C0115"
         continue-on-error: true
