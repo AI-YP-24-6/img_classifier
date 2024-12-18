@@ -14,7 +14,7 @@ def find_image_files(directory: Path) -> list[str]:
     :return: Список путей к jpeg-файлам
     """
     jpeg_files = []
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         for file in files:
             if file.endswith(("jpg", "JPG", "jpeg", "tif")):
                 full_path = os.path.join(root, file)

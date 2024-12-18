@@ -90,12 +90,15 @@ def download_art(art: dict, path: Path, session: requests.Session) -> None:
     data_json = session.get(data_url).json()
     try:
         image_name = data_json.get("images")[0].get("fileName")
-    except IndexError:
+    except IndexError as e:
         image_name = art.get("mainImage").get("code")
         if not image_name:
-            raise IndexError
+            raise IndexError from e
 
-    image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{art.get('mainImage')['code']}?originalName={image_name}"
+    image_url = (
+        f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{art.get('mainImage')['code']}"
+        f"?originalName={image_name}"
+    )
     image = session.get(image_url)
     image.raise_for_status()
 
@@ -106,7 +109,7 @@ def download_art(art: dict, path: Path, session: requests.Session) -> None:
     path_json = (path / image_id).with_suffix(".json")
 
     path_image.write_bytes(image.content)
-    with open(path_json, "w") as file:
+    with open(path_json, "w", encoding="utf-8") as file:
         json.dump(data_json, file)
 
 
