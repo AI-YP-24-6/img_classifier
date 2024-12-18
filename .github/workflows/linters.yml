@@ -1,0 +1,37 @@
+name: Pylint and pycodestyle
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: "linters"
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pycodestyle, pylint
+
+      - name: Run pycodestyle
+        run: |
+          pycodestyle . --statistics --max-line-length=120
+        continue-on-error: true
+
+      - name: Run Pylint
+        run: |
+          pylint . --max-line-length=120 "--disable=C0103,C0114,C0115"
