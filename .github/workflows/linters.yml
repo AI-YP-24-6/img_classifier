@@ -7,11 +7,13 @@ on:
 
 concurrency:
   group: "linters"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+        pull-requests: write
 
     steps:
       - name: Checkout code
@@ -43,10 +45,31 @@ jobs:
 
       - name: Run pycodestyle
         run: |
-          poetry run pycodestyle . --statistics --max-line-length=120
+          poetry run pycodestyle . --exclude=.venv --statistics --max-line-length=120 >> lint-report.txt || true
         continue-on-error: true
 
       - name: Run Pylint
         run: |
-          poetry run pylint . --max-line-length=120 "--disable=C0103,C0114,C0115"
+          poetry run pylint **/*.py --ignore='.venv' --recursive=y --max-line-length=120 "--disable=C0103,C0114,C0115" > lint-report.txt || true
         continue-on-error: true
+
+      - name: Limit report to 100 lines
+        run: |
+          tail -n 100 lint-report.txt > lint-limited-report.txt
+
+      - name: Upload lint report
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-limited-report.txt
+
+      - name: Post lint results as PR comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: Lint Results (First 100 Lines)
+          path: lint-limited-report.txt
+          hide: true
+          skip_unchanged: true
