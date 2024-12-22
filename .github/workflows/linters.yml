@@ -45,12 +45,12 @@ jobs:
 
       - name: Run pycodestyle
         run: |
-          poetry run pycodestyle . --exclude=.venv --statistics --max-line-length=120 >> lint-report.txt || true
+          poetry run pycodestyle . --exclude=.venv --statistics --max-line-length=120 > lint-report.txt || true
         continue-on-error: true
 
       - name: Run Pylint
         run: |
-          poetry run pylint **/*.py --ignore='.venv' --recursive=y --max-line-length=120 "--disable=C0103,C0114,C0115" > lint-report.txt || true
+          poetry run pylint **/*.py --ignore='.venv' --recursive=y --max-line-length=120 "--disable=C0103,C0114,C0115" >> lint-report.txt || true
         continue-on-error: true
 
       - name: Limit report to 100 lines
