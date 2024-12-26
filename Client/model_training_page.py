@@ -3,7 +3,11 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import LearningCurveDisplay, ShuffleSplit
 from sklearn.svm import SVC
 import numpy as np
+import requests
+from eda_page import UPLOADED_FILE
+import json
 
+URL_SERVER = "http://127.0.0.1:8000"
 
 # def plt_learning_curve():
 #     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6), sharey=True)
@@ -35,9 +39,23 @@ def model_training_page():
     kernel = st.selectbox("Выберите ядро:", ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
     probability = st.toggle("Включить оценку вероятности")
     
-    # request fit model
+    "hyperparameters": {
+        "svc_C": param_c,
+        "svc_kernel": kernel,
+        "probability": probability
+        },
+    "id": name_model
+    }
     
-    st.success("Модель успешно создана!")
+    config_json = json.dumps(data_config)
+    files = {"archive": ("dataset.zip", UPLOADED_FILE)}
+    
+    response = requests.post(URL_SERVER + '/fit', data={'config': config_json}, files=files)
+    
+    if response.status_code == 201:
+        st.success("Модель успешно создана!")
+    else:
+        st.error(f"Произошла ошибка: {response.text}")
     
     st.subheader("Информация о модели")
     
