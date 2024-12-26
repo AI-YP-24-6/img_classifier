@@ -7,5 +7,9 @@ indent_size = 4
 indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
+<<<<<<< HEAD
 max_line_length = 100
+=======
+max_line_length = 120
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
 tab_width = 4

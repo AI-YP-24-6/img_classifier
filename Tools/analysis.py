@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 
+<<<<<<< HEAD
 def find_image_files(path: Path) -> list[str]:
     """
     Получение списка путей к jpeg-файлам в нужной директории
@@ -17,11 +18,24 @@ def find_image_files(path: Path) -> list[str]:
     for root, dirs, files in os.walk(path):
         for file in files:
             if file.endswith((".jpg", "JPG", "jpeg", "tif")):
+=======
+def find_image_files(directory: Path) -> list[str]:
+    """
+    Получение списка путей к jpeg-файлам в нужной директории
+    :param directory: Путь к папке поиска
+    :return: Список путей к jpeg-файлам
+    """
+    jpeg_files = []
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(("jpg", "JPG", "jpeg", "tif")):
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
                 full_path = os.path.join(root, file)
                 jpeg_files.append(full_path)
     return jpeg_files
 
 
+<<<<<<< HEAD
 def find_needed_jpeg_files(path: Path, names: list[str | int]) -> list[str]:
     """
     Поиск нужных jpeg-файлов в нужной директории
@@ -37,6 +51,24 @@ def find_needed_jpeg_files(path: Path, names: list[str | int]) -> list[str]:
         for name in names:
             if name in jpeg_file:
                 needed_jpeg_files.append(jpeg_file)
+=======
+def find_needed_jpeg_files(directory: Path, target_names: list[str | int]) -> list[str]:
+    """
+    Поиск нужных jpeg-файлов в нужной директории по их id имени
+    :param directory: Путь к папке поиска
+    :param target_names: Список имен для поиска
+    :return: Список путей к jpeg-файлам
+    """
+    if not isinstance(target_names[0], str):
+        target_names = [str(name) for name in target_names]
+    jpeg_files = find_image_files(directory)
+    needed_jpeg_files = []
+    for jpeg_file in jpeg_files:
+        for name in target_names:
+            if name in jpeg_file:
+                needed_jpeg_files.append(jpeg_file)
+
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
     return needed_jpeg_files
 
 

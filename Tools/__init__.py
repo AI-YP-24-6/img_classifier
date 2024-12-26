@@ -8,7 +8,26 @@
 - `notebook`: Позволяет обновлять идентификаторы ячеек в ноутбуке.
 - `analysis`: Позволяет находить все jpeg-файлы в директории.
 """
+<<<<<<< HEAD
 from .analysis import display_images, find_needed_jpeg_files
 from .download import download_zip, extract_zip, get_ya_disk_url
 from .notebook import set_cell_id
 from .parser import goskatalog_parser, zip_files
+=======
+from .analysis import display_images, find_image_files, find_needed_jpeg_files
+from .download import download_zip, extract_zip, get_ya_disk_url
+from .notebook import set_cell_id
+from .parser import goskatalog_parser, zip_files
+
+__all__ = [
+    "display_images",
+    "find_image_files",
+    "find_needed_jpeg_files",
+    "download_zip",
+    "extract_zip",
+    "get_ya_disk_url",
+    "set_cell_id",
+    "goskatalog_parser",
+    "zip_files",
+]
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
