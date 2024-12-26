@@ -33,7 +33,7 @@ def model_training_page():
     name_model = st.text_input("Введите название модели")
     param_c = st.slider("Выберите параметр регуляризации:", 0.1, 30.0, 0.1)
     kernel = st.selectbox("Выберите ядро:", ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
-    probability = st.checkbox("Включить оценку вероятности")
+    probability = st.toggle("Включить оценку вероятности")
     
     # request fit model
     
