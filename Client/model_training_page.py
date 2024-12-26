@@ -5,9 +5,10 @@ from sklearn.svm import SVC
 import numpy as np
 import requests
 from eda_page import UPLOADED_FILE
+from client import URL_SERVER
 import json
 
-URL_SERVER = "http://127.0.0.1:8000"
+
 
 # def plt_learning_curve():
 #     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10, 6), sharey=True)

@@ -4,6 +4,8 @@ from eda_page import eda_page
 from model_training_page import model_training_page
 from model_inference import model_inference
 
+URL_SERVER = "http://127.0.0.1:8000"
+
 st.title("Сервис обучения моделей для классификации фруктов и овощей")
 
 st.sidebar.title("Меню")

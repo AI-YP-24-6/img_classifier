@@ -1,5 +1,8 @@
 import streamlit as st
 from PIL import Image
+import requests
+
+from client import URL_SERVER
 
 SIZE_IMG = (20, 20)
 def set_image_size(img: Image) ->  Image:
@@ -22,16 +25,22 @@ def model_inference():
     st.header("Инференс с использованием обученной модели")
     uploaded_image = st.file_uploader("Загрузите изображение", type=['jpeg', 'png', 'jpg'])
     if uploaded_image is not None:
-        image = Image.open(uploaded_image)
+        with open('predict_image.jpg', 'rb') as image:
         # image = set_image_size(image)
-        st.image(image, caption='Загруженное изображение', use_container_width=True)
+            st.image(image, caption='Загруженное изображение', use_container_width=True)
         # запрос на предсказание
-        name = "apple"
-        probability = 0.91 * 100
-        if st.toggle("Показать вероятность"):
-           st.markdown(f':green-background[**Я думаю это {name} c вероятность {probability} %**]')
-        else:
-            st.markdown(f':green-background[**Я думаю это {name}**]')
+            response = requests.post(URL_SERVER + '/predict', files={"image": ("predict_image", image)})
+            if response.status_code == 200:
+                print("Файл успешно загружен!")
+            else:
+                print(f"Ошибка: {response.status_code} - {response.text}")
+            
+            name = "apple"
+            probability = 0.91 * 100
+            if st.toggle("Показать вероятность"):
+                st.markdown(f':green-background[**Я думаю это {name} c вероятность {probability} %**]')
+            else:
+                st.markdown(f':green-background[**Я думаю это {name}**]')
             
         
     
