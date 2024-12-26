@@ -14,12 +14,28 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+<<<<<<< HEAD
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v5
+=======
+<<<<<<< HEAD
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+=======
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
       with:
           python-version: '3.13'
 

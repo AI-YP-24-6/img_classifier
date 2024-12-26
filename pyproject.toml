@@ -10,7 +10,15 @@ repository = "https://github.com/AI-YP-24-6/img_classifier"
 
 
 [tool.poetry.dependencies]
+<<<<<<< HEAD
 python = "^3.12"
+=======
+<<<<<<< HEAD
+python = "~3.12"
+=======
+python = "^3.12"
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
 jupyter = "~1.1.1"
 ipykernel = "~6.29.5"
 pandas = "~2.2.3"
@@ -19,7 +27,15 @@ isort = "^5.13.2"
 black = "^24.10.0"
 flake8 = "^7.1.1"
 pre-commit = "^4.0.1"
+<<<<<<< HEAD
 mkdocs-material = "~9.5.49"
+=======
+<<<<<<< HEAD
+mkdocs-material = "~9.5.44"
+=======
+mkdocs-material = "~9.5.49"
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
 mkdocstrings = { extras = ["python"], version = "^0.27.0" }
 griffe-typingdoc = "^0.2.7"
 mkdocs-jupyter = "^0.25.1"
@@ -27,11 +43,30 @@ scikit-image = "~0.24.0"
 matplotlib = "~3.9.2"
 seaborn = "^0.13.2"
 gdown = "^5.2.0"
+<<<<<<< HEAD
 exif = "^1.6.1"
 plotly = "^5.24.1"
 notebook = "^7.2.2"
 pycodestyle = "^2.12.1"
 pylint = "^3.3.2"
+=======
+<<<<<<< HEAD
+exif = "^1.6.0"
+plotly = "^5.24.1"
+notebook = "^7.2.2"
+=======
+exif = "^1.6.1"
+plotly = "^5.24.1"
+notebook = "^7.2.2"
+pycodestyle = "^2.12.1"
+pylint = "^3.3.2"
+uvicorn = "^0.34.0"
+fastapi = "^0.115.6"
+scikit-learn = "^1.6.0"
+opencv-python = "^4.10.0.84"
+python-multipart = "^0.0.20"
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
 
 
 [build-system]
@@ -39,11 +74,27 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
+<<<<<<< HEAD
 line-length = 120
+=======
+<<<<<<< HEAD
+line-length = 100
+=======
+line-length = 120
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
 target-version = ["py312"]
 
 [tool.isort]
 profile = "black"
+<<<<<<< HEAD
 line_length = 120
+=======
+<<<<<<< HEAD
+line_length = 100
+=======
+line_length = 120
+>>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
+>>>>>>> feature-fastapi
 multi_line_output = 3
 skip_gitignore = true
