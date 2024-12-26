@@ -39,6 +39,7 @@ def model_training_page():
     kernel = st.selectbox("Выберите ядро:", ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
     probability = st.toggle("Включить оценку вероятности")
     
+    data_config = {
     "hyperparameters": {
         "svc_C": param_c,
         "svc_kernel": kernel,
