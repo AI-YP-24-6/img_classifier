@@ -153,12 +153,6 @@ cython_debug/
 # image datasets
 /Notebooks/goskatalog_art/
 *.zip
-<<<<<<< HEAD
 */dataset/
-=======
-<<<<<<< HEAD
-/EDA/dataset/
-=======
 */dataset/
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
+/temp/
