@@ -4,8 +4,8 @@ import uuid
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from http import HTTPStatus
 from pydantic import BaseModel
-
 from sklearn.pipeline import Pipeline
+from loguru import logger
 
 from backend.app.services.analysis import classes_info, duplicates_info
 from backend.app.services.model_loader import load_model
@@ -61,6 +61,7 @@ class DatasetInfo(BaseModel):
 @router.post("/load_dataset", response_model=DatasetInfo, status_code=HTTPStatus.CREATED)
 async def fit(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
     if file.filename.lower().endswith(".zip") == False:
+        logger.exception("Неверный формат файла. Должен загружаться zip-архив!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Неверный формат файла. Должен загружаться zip-архив!"
@@ -72,6 +73,7 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
         duplicates = duplicates_info()
         return DatasetInfo(classes=classes, duplicates=duplicates)
     except Exception as e:
+        logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
@@ -86,6 +88,7 @@ async def fit(config: Annotated[Optional[dict[str, Any]], "Гиперпарам�
         models[model_id] = {'model': new_model, 'type': ModelType.custom, 'hyperparameters': config}
         return ModelInfo(id=model_id, type=ModelType.custom, hyperparameters=config)
     except Exception as e:
+        logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
@@ -93,12 +96,14 @@ async def fit(config: Annotated[Optional[dict[str, Any]], "Гиперпарам�
 async def predict(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
     global active_model
     if active_model is None:
+        logger.exception("Не выбрана модель")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Не выбрана модель")
     try:
         contents = await file.read()
         image = preprocess_image(contents)
         return PredictionResponse(prediction=active_model.predict([image])[0])
     except Exception as e:
+        logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
@@ -128,6 +133,7 @@ async def load(request: LoadRequest):
         active_model = models[request.id]['model']
         return ModelInfo(id=request.id, hyperparameters=models[request.id]['hyperparameters'], type=models[request.id]['type'])
     else:
+        logger.exception(f"Модель '{request.id}' не была найдена!")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Модель '{request.id}' не была найдена!")
 
 
@@ -149,6 +155,7 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
         del models[model_id]
         return {key: ModelInfo(id=key, type=models[key]['type'], hyperparameters=models[key]['hyperparameters']) for key in models.keys()}
     else:
+        logger.exception(f"Нет модели с id '{model_id}'")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
 
 
