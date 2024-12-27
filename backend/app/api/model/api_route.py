@@ -15,6 +15,7 @@ from backend.app.services.model_loader import load_model
 from backend.app.services.preprocessing import preprocess_image
 from backend.app.services.pipeline import HogTransformer, create_model
 
+
 import numpy as np
 models: Dict[str, Union[LogisticRegression, LinearRegression]] = {}
 active_model: Union[Pipeline, None] = None

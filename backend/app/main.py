@@ -5,8 +5,8 @@ from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel, ConfigDict
 
 from api.model.api_route import router
-from backend.app.services.model_loader import load_model
-from backend.app.services.pipeline import  HogTransformer
+from services.model_loader import load_model
+from services.pipeline import  HogTransformer
 
 app = FastAPI(
     title="model_trainer",
