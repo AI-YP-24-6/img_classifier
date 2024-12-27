@@ -2,7 +2,7 @@ import hashlib
 import os
 from typing import Any
 
-DATASET_DIR = './temp'
+DATASET_DIR = 'temp'
 
 
 def classes_info() -> dict[str, int]:

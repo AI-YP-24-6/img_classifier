@@ -14,8 +14,6 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
-baseline = None
-
 
 class StatusResponse(BaseModel):
     status: str
@@ -27,13 +25,10 @@ class StatusResponse(BaseModel):
 
 @app.get("/", response_model=StatusResponse, status_code=HTTPStatus.OK)
 async def root():
-    # Реализуйте метод получения информации о статусе сервиса.
     return StatusResponse(status="App healthy")
 
 
-# Реализуйте роутер с префиксом /api/v1/models
 app.include_router(router)
 
 if __name__ == "__main__":
-    baseline = load_model()
     uvicorn.run("main:app", host="0.0.0.0", port=555, reload=True)

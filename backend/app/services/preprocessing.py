@@ -7,7 +7,7 @@ import zipfile
 import cv2
 import numpy as np
 
-TEMP_DIR = "./temp"
+TEMP_DIR = "temp"
 
 
 def preprocess_image(file: bytes):

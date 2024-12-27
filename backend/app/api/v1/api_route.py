@@ -1,4 +1,3 @@
-import json
 from enum import Enum
 from typing import Union, Optional, Annotated, Any
 import uuid
@@ -7,7 +6,6 @@ from http import HTTPStatus
 from pydantic import BaseModel
 
 from sklearn.pipeline import Pipeline
-import numpy as np
 
 from backend.app.services.analysis import classes_info, duplicates_info
 from backend.app.services.model_loader import load_model
@@ -43,7 +41,7 @@ class ModelInfo(BaseModel):
 
 
 class LoadRequest(BaseModel):
-    type: Annotated[ModelType, "Тип модели"]
+    id: Annotated[str, "Id модели. Если требуется baseline-модель, то следует использовать Id='baseline'"]
 
 
 class ModelListResponse(BaseModel):
@@ -56,8 +54,8 @@ class ModelConfiguration(ModelInfo):
 
 
 class DatasetInfo(BaseModel):
-    classes: dict[str, int]
-    duplicates: dict[str, int]
+    classes: Annotated[dict[str, int], "Информация о количестве изображений в классах"]
+    duplicates: Annotated[dict[str, int], "Информация о дубликатах в классах"]
 
 
 @router.post("/load_dataset", response_model=DatasetInfo, status_code=HTTPStatus.CREATED)
@@ -78,21 +76,15 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
 
 
 @router.post("/fit", response_model=ModelInfo, status_code=HTTPStatus.CREATED)
-async def fit(config: Annotated[Optional[str], Form(..., description="Гиперпараметры модели (опционально)")]):
+async def fit(config: Annotated[Optional[dict[str, Any]], "Гиперпараметры модели (опционально)"] = None):
     try:
-        params = json.loads(config)
-        if params is not None and params is not dict:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST,
-                detail="Не удалось распознать гиперпараметры"
-            )
-        preprocess_dataset()
-        new_model = create_model(params)
+        preprocess_dataset((64, 64))
+        new_model = create_model(config)
         images, labels = load_colored_images_and_labels()
         new_model.fit(images, labels)
         model_id = str(uuid.uuid4())
-        models[model_id] = {'model': new_model, 'type': ModelType.custom, 'hyperparameters': params}
-        return ModelInfo(id=model_id, type=ModelType.custom, hyperparameters=params)
+        models[model_id] = {'model': new_model, 'type': ModelType.custom, 'hyperparameters': config}
+        return ModelInfo(id=model_id, type=ModelType.custom, hyperparameters=config)
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
@@ -110,34 +102,52 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
+@router.post("/load_baseline", response_model=ModelInfo, status_code=HTTPStatus.OK)
+async def load():
+    global active_model
+    if 'baseline' in models:
+        active_model = models['baseline']['model']
+        return ModelInfo(id="baseline", hyperparameters=models['baseline']['hyperparameters'], type=ModelType.baseline)
+    else:
+        baseline = load_model()
+        model_info = {
+            'id': 'baseline',
+            'type': 'baseline',
+            'hyperparameters': {'pca__n_components': 0.6},
+            'model': baseline
+        }
+        active_model = baseline
+        models['baseline'] = model_info
+        return ModelInfo(id="baseline", hyperparameters=model_info['hyperparameters'], type=ModelType.baseline)
+
+
 @router.post("/load", response_model=ModelInfo, status_code=HTTPStatus.OK)
 async def load(request: LoadRequest):
     global active_model
     if request.id in models:
-        active_model = models[request.id]
-        return [ApiResponse(message=f"Модель '{request.id}' загружена!")]
+        active_model = models[request.id]['model']
+        return ModelInfo(id=request.id, hyperparameters=models[request.id]['hyperparameters'], type=models[request.id]['type'])
     else:
-        return [ApiResponse(message=f"Модель '{request.id}' не была найдена!")]
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Модель '{request.id}' не была найдена!")
 
 
 @router.post("/unload", response_model=list[ApiResponse], status_code=HTTPStatus.OK)
-async def unload(request: ModelInfo):
+async def unload():
     global active_model
     active_model = None
     return [ApiResponse(message="true")]
 
 
-@router.get("/list_models", response_model=dict[str, str], status_code=HTTPStatus.OK)
+@router.get("/list_models", response_model=dict[str, ModelInfo], status_code=HTTPStatus.OK)
 async def list_models():
-    return {{"id": key} for key in models.keys()}
+    return {key: ModelInfo(id=key, type=models[key]['type'], hyperparameters=models[key]['hyperparameters']) for key in models.keys()}
 
 
-@router.delete("/remove/{model_id}", response_model=list[ApiResponse], status_code=HTTPStatus.OK)
-async def remove(model_id: str):
-    # Удаление обученной модели из списка по id модели
+@router.delete("/remove/{model_id}", response_model=dict[str, ModelInfo], status_code=HTTPStatus.OK)
+async def remove(model_id: Annotated[str, "Id модели, которую нужно удалить"]):
     if model_id in models.keys():
         del models[model_id]
-        return [ApiResponse(message=f"true")]
+        return {key: ModelInfo(id=key, type=models[key]['type'], hyperparameters=models[key]['hyperparameters']) for key in models.keys()}
     else:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
 
@@ -146,4 +156,4 @@ async def remove(model_id: str):
 async def remove_all():
     global models
     models = {}
-    return [ApiResponse(message=f"true")]
+    return [ApiResponse(message=f"Все модели удалены")]
