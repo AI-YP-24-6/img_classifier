@@ -1,5 +1,5 @@
 from typing import Union, Annotated, Any
-import uuid
+from uuid import uuid4
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from http import HTTPStatus
 from fastapi.responses import StreamingResponse
@@ -11,7 +11,7 @@ from backend.app.api.models import ApiResponse, DatasetInfo, FitRequest, Learnin
 from backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
 from backend.app.services.model_loader import load_model
 from backend.app.services.pipeline import create_model
-from backend.app.services.plot import show_images
+from backend.app.services.preview import preview_dataset, remove_preview
 from backend.app.services.preprocessing import load_colored_images_and_labels, preprocess_archive, preprocess_dataset, preprocess_image
 
 
@@ -35,7 +35,10 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
     global dataset_info
     try:
         archive = await file.read()
+        # разархивировал каринки
         preprocess_archive(archive)
+        # удалил прошлое превью, если было
+        remove_preview()
         classes = classes_info()
         duplicates = duplicates_info()
         sizes = sizes_info()
@@ -83,7 +86,7 @@ async def dataset_samples():
             detail="Нет загруженного набора данных!"
         )
     try:
-        buffer = show_images(3)
+        buffer = preview_dataset(3)
         return StreamingResponse(buffer, media_type="image/png")
     except Exception as e:
         logger.error(str(e))
@@ -105,7 +108,7 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
                 test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
 
         new_model.fit(images, labels)
-        model_id = str(uuid.uuid4())
+        model_id = str(uuid4())
         models[model_id] = {'model': new_model, 'type': ModelType.custom, 'name': request.name,
                             'hyperparameters': request.config, 'learning_curve': curve}
         return ModelInfo(
