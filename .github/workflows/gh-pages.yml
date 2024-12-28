@@ -25,21 +25,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
->>>>>>> feature-fastapi
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: "pyproject.toml"
-<<<<<<< HEAD
-
-=======
-=======
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -48,8 +33,6 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
 
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
       - name: Install Poetry
         uses: snok/install-poetry@v1.4.1
         with:
@@ -57,35 +40,13 @@ jobs:
             virtualenvs-in-project: true
             virtualenvs-path: .venv
             installer-parallel: true
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
-=======
-
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v4
         with:
             path: .venv
             key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
->>>>>>> feature-fastapi
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Build documentation
-        run: poetry run mkdocs build --clean --verbose
-<<<<<<< HEAD
-
-=======
-=======
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -94,19 +55,10 @@ jobs:
       - name: Build documentation
         run: poetry run mkdocs build --clean --verbose
 
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
-=======
-
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
