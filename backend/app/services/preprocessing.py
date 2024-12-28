@@ -24,6 +24,7 @@ def preprocess_image(file: bytes):
 def preprocess_archive(file: bytes):
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
+    
     try:
         with zipfile.ZipFile(io.BytesIO(file), 'r') as zip_ref:
             zip_ref.extractall(TEMP_DIR)

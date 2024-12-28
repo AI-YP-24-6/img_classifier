@@ -2,8 +2,6 @@ import streamlit as st
 from PIL import Image
 import requests
 
-from client import URL_SERVER
-
 SIZE_IMG = (20, 20)
 def set_image_size(img: Image) ->  Image:
     if img.mode != "RGB":
@@ -21,7 +19,7 @@ def set_image_size(img: Image) ->  Image:
     return img.resize((new_width, new_height), Image.LANCZOS)
 
 
-def model_inference():
+def model_inference(url_server):
     st.header("Инференс с использованием обученной модели")
     uploaded_image = st.file_uploader("Загрузите изображение", type=['jpeg', 'png', 'jpg'])
     if uploaded_image is not None:
@@ -29,7 +27,7 @@ def model_inference():
         # image = set_image_size(image)
             st.image(image, caption='Загруженное изображение', use_container_width=True)
         # запрос на предсказание
-            response = requests.post(URL_SERVER + '/predict', files={"image": ("predict_image", image)})
+            response = requests.post(url_server + '/predict', files={"image": ("predict_image", image)})
             if response.status_code == 200:
                 print("Файл успешно загружен!")
             else:

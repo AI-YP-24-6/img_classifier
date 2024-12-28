@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel, ConfigDict
 
-from api.v1.api_route import router
+from backend.app.api.v1.api_route import router
 from backend.app.services.model_loader import load_model
 from backend.app.services.pipeline import HogTransformer
 
@@ -32,4 +32,4 @@ async def root():
 app.include_router(router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=555, reload=True)
+    uvicorn.run("main:app", host="127.0.1.1", port=8089, reload=True)

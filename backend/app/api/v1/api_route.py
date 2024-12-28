@@ -59,19 +59,24 @@ class DatasetInfo(BaseModel):
 
 
 @router.post("/load_dataset", response_model=DatasetInfo, status_code=HTTPStatus.CREATED)
-async def fit(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
+async def fit(file: Annotated[UploadFile, File(..., description="Архив с классами изображений")]):
+    print("FIIIT1")
+    print(file.filename)
     if file.filename.lower().endswith(".zip") == False:
+        print("FIIIT2")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Неверный формат файла. Должен загружаться zip-архив!"
         )
     try:
+        print("FIIIT3")
         archive = await file.read()
         preprocess_archive(archive)
         classes = classes_info()
         duplicates = duplicates_info()
         return DatasetInfo(classes=classes, duplicates=duplicates)
     except Exception as e:
+        print("FIIIT4")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 

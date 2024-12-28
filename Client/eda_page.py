@@ -50,7 +50,7 @@ def bar(classes, counts):
     plt.close()
 
         
-def eda_page():
+def eda_page(url_server):
     st.header("EDA для датасета изображений")
     
     st.subheader("Загрузка данных")
@@ -63,7 +63,7 @@ def eda_page():
     uploaded_file = st.file_uploader("Выберите файл с датасетом", type=["zip"])
     if uploaded_file is not None:
         if check_uploaded_file(uploaded_file):
-            
+            st.session_state.uploaded_file = uploaded_file
             st.subheader("Основные статистики:")
             st.markdown("""
             - **Средний размер изображений**: (100, 100)

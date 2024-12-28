@@ -4,8 +4,6 @@ from sklearn.model_selection import LearningCurveDisplay, ShuffleSplit
 from sklearn.svm import SVC
 import numpy as np
 import requests
-from eda_page import UPLOADED_FILE
-from client import URL_SERVER
 import json
 
 
@@ -32,7 +30,7 @@ import json
 #         ax[ax_idx].legend(handles[:2], ["Training Score", "Test Score"])
 #         ax[ax_idx].set_title(f"Learning Curve for {estimator.__class__.__name__}")
     
-def model_training_page():
+def model_training_page(url_server):
     st.header("Создание новой модели SVC и выбор гиперпараметров")
     
     name_model = st.text_input("Введите название модели")
@@ -50,14 +48,18 @@ def model_training_page():
     }
     
     config_json = json.dumps(data_config)
-    files = {"archive": ("dataset.zip", UPLOADED_FILE)}
-    
-    response = requests.post(URL_SERVER + '/fit', data={'config': config_json}, files=files)
-    
-    if response.status_code == 201:
-        st.success("Модель успешно создана!")
-    else:
-        st.error(f"Произошла ошибка: {response.text}")
+    print(url_server)
+    if "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
+        files = {"file": st.session_state.uploaded_file}
+        
+        print(st.session_state.uploaded_file)
+
+        response = requests.post(url_server + '/load_dataset', files=files)
+        print(response.status_code)
+        if response.status_code == 201:
+            st.success("Модель успешно создана!")
+        else:
+            st.error(f"Произошла ошибка: {response.text}")
     
     st.subheader("Информация о модели")
     
