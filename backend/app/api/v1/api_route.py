@@ -143,7 +143,7 @@ async def list_models():
     ) for key in models.keys()}
 
 
-@router.get("/{model_id}", response_model=ModelInfo, status_code=HTTPStatus.OK)
+@router.get("/info/{model_id}", response_model=ModelInfo, status_code=HTTPStatus.OK)
 async def model_info(model_id: Annotated[str, "Id модели"]):
     if model_id in models:
         model = models[model_id]
