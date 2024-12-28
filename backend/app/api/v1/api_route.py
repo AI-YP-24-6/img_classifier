@@ -1,9 +1,7 @@
-from enum import Enum
-from typing import Union, Optional, Annotated, Any
+from typing import Union, Annotated, Any
 import uuid
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from http import HTTPStatus
-from pydantic import BaseModel
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import learning_curve
 from loguru import logger
