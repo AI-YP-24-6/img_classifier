@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict
 from contextlib import asynccontextmanager
 
-from api.v1.api_route import router
+from backend.app.api.v1.api_route import router
 from backend.app.services.model_loader import load_model
 from backend.app.services.pipeline import HogTransformer
 

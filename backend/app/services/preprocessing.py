@@ -19,7 +19,7 @@ def preprocess_image(file: bytes):
         return np.array(image)
     except Exception as e:
         raise ValueError(f"Ошибка обработки файла: {e}")
-
+    
 
 def preprocess_archive(file: bytes):
     if os.path.exists(TEMP_DIR):

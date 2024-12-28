@@ -4,6 +4,9 @@ from typing import Any
 import zipfile
 from PIL import Image
 import numpy as np
+import requests
+from backend.app.api.models import DatasetInfo
+import json
 
 CLASS_DICT = {}
 
@@ -64,13 +67,27 @@ def eda_page(url_server):
     if uploaded_file is not None:
         if check_uploaded_file(uploaded_file):
             st.session_state.uploaded_file = uploaded_file
+            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+            response = requests.post(url_server + '/load_dataset', files=files)
+            if response.status_code == 201:
+                st.success("Датасет успешно загружен на сервер")
+                print(response.text)
+                try:
+                    response_data = json.loads(response.text)
+                    dataset_info = DatasetInfo(**response_data)
+                    st.write("**Классы:**", dataset_info.classes)
+                except Exception as e:
+                    st.error(f"Ошибка при парсинге ответа: {e}")
+            else:
+                st.error(f"Произошла ошибка: {response.text}")
+            
             st.subheader("Основные статистики:")
             st.markdown("""
             - **Средний размер изображений**: (100, 100)
-            - **Наличие дубликатов**: Да/нет.
             - **Средние значения по каналам RGB**: (0.3, 0.4, 0.5)).
             - **Средние отклонения по каналам RGB**: (0.3, 0.4, 0.5)).
             """)
+            st.write("**Дубликаты**:", dataset_info.duplicates)
             st.subheader("График распределения изображений по классам:")
             bar(CLASS_DICT.keys(), len(CLASS_DICT.values()))
             display_images(uploaded_file)
