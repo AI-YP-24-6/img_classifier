@@ -1,8 +1,9 @@
 import streamlit as st
 
 from eda_page import eda_page
-from Client.model_training_page import model_training_page
-from Client.model_inference import model_inference
+from model_training_page import model_training_page
+from model_inference import model_inference
+
 from streamlit_option_menu import option_menu
 
 if "url_server" not in st.session_state:
