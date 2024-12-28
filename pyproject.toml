@@ -23,6 +23,7 @@ mkdocs-material = "~9.5.49"
 mkdocstrings = { extras = ["python"], version = "^0.27.0" }
 griffe-typingdoc = "^0.2.7"
 mkdocs-jupyter = "^0.25.1"
+scikit-image = "~0.24.0"
 matplotlib = "~3.9.2"
 seaborn = "^0.13.2"
 gdown = "^5.2.0"
@@ -36,7 +37,7 @@ fastapi = "^0.115.6"
 scikit-learn = "^1.6.0"
 opencv-python = "^4.10.0.84"
 python-multipart = "^0.0.20"
-scikit-image = "~0.24.0"
+loguru = "^0.7.3"
 
 
 [build-system]
