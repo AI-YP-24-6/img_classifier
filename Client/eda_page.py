@@ -8,40 +8,10 @@ import requests
 from backend.app.api.models import DatasetInfo
 import json
 from io import BytesIO
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
 
-CLASS_DICT = {}
-
-def check_uploaded_file(upload_file: Any) -> bool:
-    is_correct_format = True
-    correct_format = ('.jpg', '.jpeg')
-    with zipfile.ZipFile(upload_file, 'r') as z:
-        for file_info in z.infolist():
-            if file_info.filename.endswith(correct_format):
-                class_name = file_info.filename.split('/')[0]                
-                if class_name not in CLASS_DICT:
-                    CLASS_DICT[class_name] = []
-                CLASS_DICT[class_name].append(file_info.filename)
-                continue
-            elif not file_info.is_dir():
-                st.error(f"Файл {file_info.filename} имеет неправильный формат или находится вне папки классов.")
-                is_correct_format = False
-    return is_correct_format
-
-
-def display_images(uploaded_file):
-    st.subheader("Примеры изображений по классам")
-    for class_name, images in CLASS_DICT.items():
-        st.write(f"**Класс: {class_name}**")
-        images_to_display = images[:3]
-        num_images = len(images_to_display)
-        for i in range(0, num_images, 3):
-            cols = st.columns(3)
-            for j in range(3):
-                if i + j < num_images:
-                    with zipfile.ZipFile(uploaded_file, 'r') as z:
-                        with z.open(images_to_display[i + j]) as img_file:
-                            img = Image.open(img_file)
-                            cols[j].image(img, caption=images_to_display[i + j])
 def bar(classes, counts):
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
@@ -51,32 +21,73 @@ def bar(classes, counts):
     plt.ylabel("Количество изображений", fontsize=30)
     st.pyplot(plt)
     plt.close()
+    
 def show_images(url_server):
+    st.subheader("Примеры изображений по классам")
     try:
-        response = requests.get(url_server + '/dataset_samples')
-        img = Image.open(BytesIO(response.content))
-        st.image(img, caption="Загруженные изображения", use_container_width=True)
+        with st.spinner("Ожидаем загрузки изображений..."):
+            response = requests.get(url_server + '/dataset_samples')
+            img = Image.open(BytesIO(response.content))
+            st.image(img, caption="Загруженные изображения", use_container_width=True)
 
     except Exception as e:
         st.error(f"Ошибка получение изображений с датасета {e}")
+
+def show_bar_std_mean_rgb(rgb_df, cls):
+    rows = rgb_df[rgb_df['class'] == cls].values
+    mean_r = np.mean(rows[:, 2])
+    mean_g = np.mean(rows[:, 3])
+    mean_b = np.mean(rows[:, 4])
+    std_r = np.std(rows[:, 5])
+    std_g = np.std(rows[:, 6])
+    std_b = np.std(rows[:, 7])
+
+    means = [mean_r, mean_g, mean_b]
+    stds = [std_r, std_g, std_b]
+    channels = ['R', 'G', 'B']
+
+    # Создание графика
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=channels,
+        y=means,
+        error_y={'type': 'data', 'array': stds, 'visible': True},
+        marker={'color': ['red', 'green', 'blue']},
+        opacity=0.7
+    ))
+    fig.update_layout(
+        xaxis_title='Каналы',
+        yaxis_title='Значение пикселей',
+        width=800,
+        height=400
+    )
+    
+    st.plotly_chart(fig)
     
 def show_eda(url_server):
     try:
         response = requests.get(url_server + '/dataset_info')
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
-        st.write("**Классы:**", dataset_info.classes)
         st.subheader("Основные статистики:")
-        st.markdown("""
-            - **Средний размер изображений**: (100, 100)
-            - **Средние значения по каналам RGB**: (0.3, 0.4, 0.5)).
-            - **Средние отклонения по каналам RGB**: (0.3, 0.4, 0.5)).
-            """)
-        st.write("**Дубликаты**:", dataset_info.duplicates)
+        size_df = pd.DataFrame(dataset_info.sizes, columns=['class', 'name', 'width', 'height'])
+        st.write(f'**Средний размер изображений**: ширина: {round(size_df['width'].mean(),0)}, высота: {round(size_df['height'].mean(),0)}')
+        
         st.subheader("График распределения изображений по классам:")
         bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
         
-        # display_images(uploaded_file)
+        if dataset_info.duplicates is not None:
+            st.subheader("График распределения дубликатов по классам:")
+            bar(dataset_info.duplicates.keys(), dataset_info.duplicates.values())
+        else:
+            st.write("**Дубликатов нет**")
+        
+        st.subheader("Среднее значение и стандартное отклонение по каналам (R, G, B)")
+        rgb_df = pd.DataFrame(dataset_info.colors, columns=['class', 'name', 'mean_R', 'mean_G', 'mean_B', 'std_R', 'std_G', 'std_B'])
+        classes = rgb_df['class'].unique()
+        cls = st.selectbox("Выберите класс", classes)
+        show_bar_std_mean_rgb(rgb_df, cls)
+        
     except Exception as e:
         st.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
       
@@ -90,17 +101,16 @@ def eda_page(url_server):
         """)
     uploaded_file = st.file_uploader("Выберите файл с датасетом", type=["zip"])
     if uploaded_file is not None:
-        if check_uploaded_file(uploaded_file):
-            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
-            with st.spinner("Ожидаем загрузки датасета на сервер..."):
-                response = requests.post(url_server + '/load_dataset', files=files)
-                if response.status_code == 201:
-                    st.session_state.uploaded_file = uploaded_file
-                    st.success("Датасет успешно загружен на сервер")
-                    show_eda(url_server)
-                    show_images(url_server)
-                else:
-                    st.error(f"Произошла ошибка: {response.text}")
+        files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+        with st.spinner("Ожидаем загрузки датасета на сервер..."):
+            response = requests.post(url_server + '/load_dataset', files=files)
+            if response.status_code == 201:
+                st.session_state.uploaded_file = uploaded_file
+                st.success("Датасет успешно загружен на сервер")
+                show_eda(url_server)
+                show_images(url_server)
+            else:
+                st.error(f"Произошла ошибка: {response.text}")
     elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
         show_eda(url_server)
         show_images(url_server)
