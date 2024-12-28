@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import learning_curve
 from loguru import logger
 
-from backend.app.api.models import ApiResponse, DatasetInfo, FitRequest, LearningCurvelInfo, LoadRequest, ModelInfo, ModelType, PredictionResponse
+from backend.app.api.models import ApiResponse, DatasetInfo, FitRequest, LearningCurvelInfo, LoadRequest, ModelInfo, ModelType, PredictionResponse, TableModel
 from backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
 from backend.app.services.model_loader import load_model
 from backend.app.services.pipeline import create_model
@@ -41,8 +41,10 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
         remove_preview()
         classes = classes_info()
         duplicates = duplicates_info()
-        sizes = sizes_info()
-        colors = colors_info()
+        sizes: TableModel = {'rows': sizes_info(), 'columns': [
+            'class', 'name', 'width', 'height']}
+        colors: TableModel = {'rows': colors_info(), 'columns': [
+            'class', 'name', 'mean_R', 'mean_G', 'mean_B', 'std_R', 'std_G', 'std_B']}
         dataset_info = {
             'classes': classes,
             'duplicates': duplicates,

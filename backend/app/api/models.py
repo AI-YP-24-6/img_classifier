@@ -39,7 +39,8 @@ class LoadRequest(BaseModel):
 
 class FitRequest(BaseModel):
     config: Annotated[dict[str, Any], "Гиперпараметры модели (опционально)"]
-    with_learning_curve: Annotated[bool, "Сохранять ли для модели кривую обучения"]
+    with_learning_curve: Annotated[bool,
+                                   "Сохранять ли для модели кривую обучения"]
     name: Annotated[str, "Название модели"]
 
 
@@ -48,10 +49,15 @@ class ModelListResponse(BaseModel):
                       "Список моделей, доступных пользователю"]
 
 
+class TableModel(BaseModel):
+    columns: list[Any]
+    rows: list[list[Any]]
+
+
 class DatasetInfo(BaseModel):
     classes: Annotated[dict[str, int],
                        "Информация о количестве изображений в классах"]
     duplicates: Annotated[dict[str, int], "Информация о дубликатах в классах"]
-    sizes: Annotated[list[list[Any]],
+    sizes: Annotated[TableModel,
                      "Список размеров изображений"]
-    colors: Annotated[list[list[Any]], "Список цветов по каналам изображений"]
+    colors: Annotated[TableModel, "Список цветов по каналам изображений"]
