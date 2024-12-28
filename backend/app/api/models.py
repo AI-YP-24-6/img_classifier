@@ -19,7 +19,8 @@ class ModelType(Enum):
 
 class LearningCurvelInfo(BaseModel):
     train_sizes: Annotated[list[int], "Количество примеров обучения"]
-    train_scores: Annotated[list[list[float]], "Результаты тренировочных сетов"]
+    train_scores: Annotated[list[list[float]],
+                            "Результаты тренировочных сетов"]
     test_scores: Annotated[list[list[float]], "Результаты тестовых сетов"]
 
 
@@ -27,7 +28,9 @@ class ModelInfo(BaseModel):
     id: Annotated[str, "Id модели"]
     hyperparameters: Annotated[dict[str, Any], "Гиперпараметры модели"]
     type: Annotated[ModelType, "Тип модели"]
-    learning_curve: Annotated[Optional[LearningCurvelInfo], "Данные для кривой обучения модели"]
+    learning_curve: Annotated[Optional[LearningCurvelInfo],
+                              "Данные для кривой обучения модели"]
+    name: Annotated[str, "Название модели"]
 
 
 class LoadRequest(BaseModel):
@@ -36,13 +39,19 @@ class LoadRequest(BaseModel):
 
 class FitRequest(BaseModel):
     config: Annotated[dict[str, Any], "Гиперпараметры модели (опционально)"]
-    with_learning_curve: bool
+    with_learning_curve: Annotated[bool, "Сохранять ли для модели кривую обучения"]
+    name: Annotated[str, "Название модели"]
 
 
 class ModelListResponse(BaseModel):
-    models: Annotated[list[ModelInfo], "Список моделей, доступных пользователю"]
+    models: Annotated[list[ModelInfo],
+                      "Список моделей, доступных пользователю"]
 
 
 class DatasetInfo(BaseModel):
-    classes: Annotated[dict[str, int], "Информация о количестве изображений в классах"]
+    classes: Annotated[dict[str, int],
+                       "Информация о количестве изображений в классах"]
     duplicates: Annotated[dict[str, int], "Информация о дубликатах в классах"]
+    sizes: Annotated[list[list[Any]],
+                     "Список размеров изображений"]
+    colors: Annotated[list[list[Any]], "Список цветов по каналам изображений"]
