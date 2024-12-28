@@ -54,7 +54,8 @@ def model_training_page(url_server):
         "svc__kernel": kernel,
         "svc__probability": probability
         },
-        with_learning_curve = learning_curve
+        with_learning_curve = learning_curve,
+        name = name_model
     )
     
     fit_json = fit_request_data.model_dump()
@@ -69,7 +70,7 @@ def model_training_page(url_server):
                     model_info = ModelInfo(**response_data)
                     st.subheader("Информация о модели")
                     st.markdown(f"""
-                        - **Название модели:** {model_info.id}
+                        - **Название модели:** {model_info.name}
                         - **Параметр C =** {model_info.hyperparameters['svc__C']}
                         - **Ядро:** {model_info.hyperparameters['svc__kernel']}
                         - **Оценка вероятности:** {model_info.hyperparameters['svc__probability']}
@@ -77,7 +78,6 @@ def model_training_page(url_server):
                     
                     st.subheader("Поученные кривые обучения")
                     learning_curve = model_info.learning_curve
-                    print(f'Sizes = {learning_curve.train_sizes}')
                     plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
                     
                 except Exception as e:
