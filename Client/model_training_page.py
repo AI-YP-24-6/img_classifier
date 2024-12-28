@@ -64,12 +64,14 @@ def model_training_page(url_server):
             else:
                 model_info_list = []
                 for _, model_info in model_data.items():
-                    model_info_list.append(ModelInfo(**model_info)) 
-                 
+                    model_info_list.append(ModelInfo(**model_info))
+                
+                st.session_state.model_info_list = model_info_list
                 model_names = [model.name for model in model_info_list]
                 selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
                 selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
                 show_model_statistics(selected_model_info)
+                
             
     except Exception as e:
         st.error(f"На сервере ошибка {e}")
