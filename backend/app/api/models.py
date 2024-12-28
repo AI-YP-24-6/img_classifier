@@ -12,6 +12,10 @@ class PredictionResponse(BaseModel):
     prediction: Annotated[str, "Предсказание класса изображения"]
 
 
+class ProbabilityResponse(PredictionResponse):
+    probability: Annotated[float, "Вероятность предсказанного класса"]
+
+
 class ModelType(Enum):
     baseline = 'baseline'
     custom = 'custom'
