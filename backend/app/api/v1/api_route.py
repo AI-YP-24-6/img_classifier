@@ -17,7 +17,8 @@ from backend.app.services.preprocessing import load_colored_images_and_labels, p
 
 models: dict[str, Any] = {}
 active_model: Union[Pipeline, None] = None
-dataset_info: Union[dict[str, Any], None] = None
+active_model_info: Union[ModelInfo, None] = None
+dataset_info: Union[DatasetInfo, None] = None
 
 
 router = APIRouter(prefix="/api/v1/models")
@@ -50,18 +51,13 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
             'class', 'name', 'width', 'height']}
         colors: TableModel = {'rows': colors_info(), 'columns': [
             'class', 'name', 'mean_R', 'mean_G', 'mean_B', 'std_R', 'std_G', 'std_B']}
-        dataset_info = {
-            'classes': classes,
-            'duplicates': duplicates,
-            'sizes': sizes,
-            'colors': colors
-        }
-        return DatasetInfo(
+        dataset_info = DatasetInfo(
             classes=classes,
             duplicates=duplicates,
             sizes=sizes,
             colors=colors
         )
+        return dataset_info
     except Exception as e:
         logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
@@ -81,12 +77,7 @@ async def get_dataset_info():
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Нет загруженного набора данных!"
         )
-    return DatasetInfo(
-        classes=dataset_info['classes'],
-        duplicates=dataset_info['duplicates'],
-        sizes=dataset_info['sizes'],
-        colors=dataset_info['colors']
-    )
+    return dataset_info
 
 
 @router.get(
@@ -131,7 +122,7 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
 
         new_model.fit(images, labels)
         model_id = str(uuid4())
-        models[model_id] = {'model': new_model, 'type': ModelType.custom, 'name': request.name,
+        models[model_id] = {'id': model_id, 'model': new_model, 'type': ModelType.custom, 'name': request.name,
                             'hyperparameters': request.config, 'learning_curve': curve}
         return ModelInfo(
             name=request.name,
@@ -198,9 +189,10 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
 )
 async def load_baseline():
     global active_model
+    global active_model_info
     if 'baseline' in models:
         active_model = models['baseline']['model']
-        return ModelInfo(
+        active_model_info = ModelInfo(
             id='baseline',
             hyperparameters=models['baseline']['hyperparameters'],
             type=ModelType.baseline,
@@ -219,13 +211,14 @@ async def load_baseline():
         }
         active_model = baseline
         models['baseline'] = model_info
-        return ModelInfo(
+        active_model_info = ModelInfo(
             id='baseline',
             hyperparameters=model_info['hyperparameters'],
             type=ModelType.baseline,
             name="Baseline",
             learning_curve=None
         )
+    return active_model_info
 
 
 @router.post(
@@ -236,9 +229,17 @@ async def load_baseline():
 )
 async def load(request: LoadRequest):
     global active_model
+    global active_model_info
     if request.id in models:
         model = models[request.id]
         active_model = model['model']
+        active_model_info = {
+            'id': request.id,
+            'hyperparameters': model['hyperparameters'],
+            'type': model['type'],
+            'learning_curve': model['learning_curve'],
+            'name': model['name']
+        }
         return ModelInfo(
             id=request.id,
             hyperparameters=model['hyperparameters'],
@@ -260,7 +261,9 @@ async def load(request: LoadRequest):
 )
 async def unload():
     global active_model
+    global active_model_info
     active_model = None
+    active_model_info = None
     return ApiResponse(message="Модель выгружена из памяти")
 
 
