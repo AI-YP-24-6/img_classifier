@@ -112,5 +112,6 @@ def eda_page(url_server):
             else:
                 st.error(f"Произошла ошибка: {response.text}")
     elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
+        st.subheader(f"**Датасет:** {st.session_state.uploaded_file.name}")
         show_eda(url_server)
         show_images(url_server)
