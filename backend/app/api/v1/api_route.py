@@ -64,7 +64,7 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
 async def get_dataset_info():
     global dataset_info
     if dataset_info is None:
-        logger.exception("Нет загруженного набора данных!")
+        # Не логгируется, т.к. не ошибка
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Нет загруженного набора данных!"
