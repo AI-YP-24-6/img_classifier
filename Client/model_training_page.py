@@ -50,12 +50,11 @@ def model_training_page(url_server):
     config_json = json.dumps(data_config)
     print(url_server)
     if "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
-        files = {"file": st.session_state.uploaded_file}
-        
-        print(st.session_state.uploaded_file)
+        uploaded_file = st.session_state.uploaded_file
+        files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
 
         response = requests.post(url_server + '/load_dataset', files=files)
-        print(response.status_code)
+        
         if response.status_code == 201:
             st.success("Модель успешно создана!")
         else:
