@@ -30,7 +30,7 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
     
     plt.title("Кривые обучения")
     plt.xlabel("Размер обучающей выборки")
-    plt.ylabel("Оценка")
+    plt.ylabel("f1-macro")
     plt.xticks(train_sizes)
     plt.yticks(np.arange(0, 1.1, 0.1))
     plt.ylim(0, 1)
@@ -38,9 +38,43 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
     plt.grid()
     st.pyplot(plt)
     plt.close()
+
+def show_model_statistics(model_info):
+    st.subheader("Информация о модели")
+    st.markdown(f"""
+                - **Название модели:** {model_info.name}
+                - **Параметр C =** {model_info.hyperparameters['svc__C']}
+                - **Ядро:** {model_info.hyperparameters['svc__kernel']}
+                - **Оценка вероятности:** {model_info.hyperparameters['svc__probability']}
+                """)
+    
+    learning_curve = model_info.learning_curve
+    if learning_curve is not None:
+        st.subheader("Поученные кривые обучения")
+        plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
     
 def model_training_page(url_server):
-    st.header("Создание новой модели SVC и выбор гиперпараметров")
+    st.subheader("Выбор существующих моделей")
+    try:
+        with st.spinner("Загрузка списка моделей..."):
+            response = requests.get(url_server + '/list_models')
+            model_data = response.json()
+            if not model_data:
+                st.warning("Список моделей пуст.")
+            else:
+                model_info_list = []
+                for _, model_info in model_data.items():
+                    model_info_list.append(ModelInfo(**model_info)) 
+                 
+                model_names = [model.name for model in model_info_list]
+                selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
+                selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
+                show_model_statistics(selected_model_info)
+            
+    except Exception as e:
+        st.error(f"На сервере ошибка {e}")
+        
+    st.subheader("Создание новой модели SVC и выбор гиперпараметров")
     
     name_model = st.text_input("Введите название модели")
     param_c = st.slider("Выберите параметр регуляризации:", 0.1, 30.0, 0.1)
@@ -68,22 +102,12 @@ def model_training_page(url_server):
                 try:
                     response_data = json.loads(response.text)
                     model_info = ModelInfo(**response_data)
-                    st.subheader("Информация о модели")
-                    st.markdown(f"""
-                        - **Название модели:** {model_info.name}
-                        - **Параметр C =** {model_info.hyperparameters['svc__C']}
-                        - **Ядро:** {model_info.hyperparameters['svc__kernel']}
-                        - **Оценка вероятности:** {model_info.hyperparameters['svc__probability']}
-                         """)
-                    
-                    st.subheader("Поученные кривые обучения")
-                    learning_curve = model_info.learning_curve
-                    plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
-                    
+                    show_model_statistics(model_info)
                 except Exception as e:
                     st.error(f"Ошибка при парсинге ответа: {e}")
             else:
                 st.error(f"Произошла ошибка: {response.text}")
+    
 
     
     
