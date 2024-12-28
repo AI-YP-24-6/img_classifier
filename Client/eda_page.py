@@ -7,6 +7,7 @@ import numpy as np
 import requests
 from backend.app.api.models import DatasetInfo
 import json
+from io import BytesIO
 
 CLASS_DICT = {}
 
@@ -50,10 +51,18 @@ def bar(classes, counts):
     plt.ylabel("Количество изображений", fontsize=30)
     st.pyplot(plt)
     plt.close()
-
-def show_eda(url_server):
-    response = requests.get(url_server + '/dataset_info')
+def show_images(url_server):
     try:
+        response = requests.get(url_server + '/dataset_samples')
+        img = Image.open(BytesIO(response.content))
+        st.image(img, caption="Загруженные изображения", use_container_width=True)
+
+    except Exception as e:
+        st.error(f"Ошибка получение изображений с датасета {e}")
+    
+def show_eda(url_server):
+    try:
+        response = requests.get(url_server + '/dataset_info')
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
         st.write("**Классы:**", dataset_info.classes)
@@ -66,48 +75,32 @@ def show_eda(url_server):
         st.write("**Дубликаты**:", dataset_info.duplicates)
         st.subheader("График распределения изображений по классам:")
         bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
+        
         # display_images(uploaded_file)
     except Exception as e:
-        st.error(f"Ошибка получение EDA данных: {e}")
+        st.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
       
 def eda_page(url_server):
     st.header("EDA для датасета изображений")
-    
-    if 'is_upload_file' not in st.session_state:
-        st.session_state.is_upload_file = False
-    
-    is_upload_file = st.checkbox(label="Датасет уже загружен", value=st.session_state.is_upload_file)
-    
-    if is_upload_file == False:
-        st.subheader("Загрузка данных")
-        st.info("пожалуйста, убедитесь, что ваш датасет соответствует следующим требованиям:")
-        st.markdown("""
+    st.subheader("Загрузка данных")
+    st.info("Пожалуйста, убедитесь, что ваш датасет соответствует следующим требованиям:")
+    st.markdown("""
         - **Формат изображений**: JPEG.
         - **Аннотации**: метки классов должны быть представлены в отдельной структуре папок.
         """)
-        uploaded_file = st.file_uploader("Выберите файл с датасетом", type=["zip"])
-        if uploaded_file is not None:
-            if check_uploaded_file(uploaded_file):
-                st.session_state.is_upload_file = True
-                st.session_state.uploaded_file = uploaded_file
-                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
-                with st.spinner("Ожидаем загрузки датасета на сервер..."):
-                    response = requests.post(url_server + '/load_dataset', files=files)
-                    if response.status_code == 201:
-                        st.success("Датасет успешно загружен на сервер")
-                        show_eda(url_server)
-                    else:
-                        st.error(f"Произошла ошибка: {response.text}")
-    
-    else:
-        if "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
-            uploaded_file = st.session_state.uploaded_file
-            show_eda(url_server)
-        
-    
-            
-        
-        # response = -1
-        # bar(response[0], response[1])
-        # размер изображений, баланс классов, есть ли дубликаты, Средние значения и отклонения по каналам (R, G, B), визуализация нескольких изображений с каждого класса
-        # график распределения изображений по классам, выявление аномалий
+    uploaded_file = st.file_uploader("Выберите файл с датасетом", type=["zip"])
+    if uploaded_file is not None:
+        if check_uploaded_file(uploaded_file):
+            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+            with st.spinner("Ожидаем загрузки датасета на сервер..."):
+                response = requests.post(url_server + '/load_dataset', files=files)
+                if response.status_code == 201:
+                    st.session_state.uploaded_file = uploaded_file
+                    st.success("Датасет успешно загружен на сервер")
+                    show_eda(url_server)
+                    show_images(url_server)
+                else:
+                    st.error(f"Произошла ошибка: {response.text}")
+    elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
+        show_eda(url_server)
+        show_images(url_server)
