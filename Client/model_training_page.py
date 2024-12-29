@@ -72,6 +72,8 @@ def get_models_list(url_server):
             else:
                 for _, model_info in model_data.items():
                     model_info_list.append(ModelInfo(**model_info))
+                    
+                st.session_state.model_info_list = model_info_list
             return model_info_list
     except Exception as e:
         print(f'Ошибка получения списка моделей')

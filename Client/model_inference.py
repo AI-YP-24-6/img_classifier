@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import requests
-from backend.app.api.models import LoadRequest, PredictionResponse
+from backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
 import json
 
 SIZE_IMG = (20, 20)
@@ -20,6 +20,17 @@ def set_image_size(img: Image) ->  Image:
         
     return img.resize((new_width, new_height), Image.LANCZOS)
 
+def make_prediction(url_server, files, use_probability):
+    endpoint = '/predict_proba' if use_probability else '/predict'
+    response = requests.post(url_server + endpoint, files=files)
+
+    if response.status_code == 200:
+        response_data = json.loads(response.text)
+        return response_data
+    else:
+        print(f"Ошибка: {response.status_code} - {response.text}")
+        return None
+
 
 def model_inference(url_server):
     st.header("Инференс с использованием обученной модели")
@@ -32,7 +43,7 @@ def model_inference(url_server):
             load_model = LoadRequest(id=selected_model_info.id)
             load_json = load_model.model_dump()
             response = requests.post(url_server + "/load", json=load_json)      
-            st.success("Модель успешно подготовлена для предсказания")  
+            st.success(f"Модель {selected_model_name} успешно подготовлена для предсказания")  
     else:
         st.warning("Нет обученных моделей")
     
@@ -41,22 +52,15 @@ def model_inference(url_server):
         st.image(uploaded_image, caption='Загруженное изображение', use_container_width=True)
         
         files = {"file": (uploaded_image.name, uploaded_image.getvalue(), uploaded_image.type)}
-        response = requests.post(url_server + '/predict', files=files)
-        
-        if response.status_code == 200:
-            print("Файл успешно загружен!")
-            response_data = json.loads(response.text)
-            prediction_info = PredictionResponse(**response_data)
-            st.markdown(f':green-background[**Я думаю это {prediction_info.prediction}**]')
-        else:
-            print(f"Ошибка: {response.status_code} - {response.text}")
-            
-            # name = "apple"
-            # probability = 0.91 * 100
-            # if st.toggle("Показать вероятность"):
-            #     st.markdown(f':green-background[**Я думаю это {name} c вероятность {probability} %**]')
-            # else:
-            #     st.markdown(f':green-background[**Я думаю это {name}**]')
+        response_data = make_prediction(url_server, files, selected_model_info.hyperparameters['svc__probability'])
+
+        if response_data:
+            if selected_model_info.hyperparameters['svc__probability']:
+                prediction_info = ProbabilityResponse(**response_data)
+                st.markdown(f':green-background[**Я думаю это {prediction_info.prediction} с вероятностью {round(prediction_info.probability,2)*100} %**]')
+            else:
+                prediction_info = PredictionResponse(**response_data)
+                st.markdown(f':green-background[**Я думаю это {prediction_info.prediction}**]')
             
         
     
