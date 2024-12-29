@@ -27,7 +27,7 @@ def show_images(url_server):
     st.subheader("Примеры изображений по классам")
     try:
         with st.spinner("Ожидаем загрузки изображений..."):
-            response = requests.get(url_server + "/dataset_samples")
+            response = requests.get(url_server + "dataset/samples")
             img = Image.open(BytesIO(response.content))
             st.image(img, caption="Загруженные изображения", use_container_width=True)
 
@@ -66,7 +66,7 @@ def show_bar_std_mean_rgb(rgb_df, cls):
 
 def show_eda(url_server):
     try:
-        response = requests.get(url_server + "/dataset_info")
+        response = requests.get(url_server + "dataset/info")
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
         st.subheader("Основные статистики:")
@@ -110,7 +110,7 @@ def eda_page(url_server):
     if uploaded_file is not None:
         files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
         with st.spinner("Ожидаем загрузки датасета на сервер..."):
-            response = requests.post(url_server + "/load_dataset", files=files)
+            response = requests.post(url_server + "dataset/load", files=files)
             if response.status_code == 201:
                 st.session_state.uploaded_file = uploaded_file
                 st.success("Датасет успешно загружен на сервер")

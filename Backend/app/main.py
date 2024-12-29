@@ -1,6 +1,5 @@
 import os
 import sys
-from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 import uvicorn
@@ -8,7 +7,7 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-from Backend.app.api.v1.api_route import router
+from Backend.app.api.v1.api_route import router_models, router_dataset
 
 LOG_FOLDER = "logs"
 
@@ -55,20 +54,14 @@ class StatusResponse(BaseModel):
     model_config = ConfigDict(json_schema_extra={"examples": [{"status": "App healthy"}]})
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("Работа сервера начата")
-    yield
-    logger.info("Работа сервера завершена")
-
-
 @app.get("/", response_model=StatusResponse, status_code=HTTPStatus.OK)
 async def root():
     return StatusResponse(status="App healthy")
 
 
-app.include_router(router)
+app.include_router(router_dataset)
+app.include_router(router_models)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=555, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=54545, reload=True)

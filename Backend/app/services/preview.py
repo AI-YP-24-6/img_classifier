@@ -5,8 +5,8 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from PIL import Image
 
-DATASET_DIR = "temp"
-PREVIEW_DIR = "preview"
+DATASET_DIR = "data/raw"
+PREVIEW_DIR = "data/preview"
 PREVIEW_PATH = os.path.join(PREVIEW_DIR, "preview.png")
 
 
@@ -42,9 +42,12 @@ def remove_preview():
 
 
 def preview_dataset(num_images: int):
-    if os.path.exists(PREVIEW_PATH):
-        with open(PREVIEW_PATH, "rb") as f:
-            buffer = BytesIO(f.read())
-            return buffer
+    if os.path.exists(DATASET_DIR):
+        if os.path.exists(PREVIEW_PATH):
+            with open(PREVIEW_PATH, "rb") as f:
+                buffer = BytesIO(f.read())
+                return buffer
+        else:
+            return plot_images(num_images=num_images)
     else:
-        return plot_images(num_images=num_images)
+        raise ValueError("Нет загруженного набора данных!")

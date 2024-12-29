@@ -7,7 +7,7 @@ from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityR
 
 
 def make_prediction(url_server, files, use_probability):
-    endpoint = "/predict_proba" if use_probability else "/predict"
+    endpoint = "models/predict_proba" if use_probability else "models/predict"
     response = requests.post(url_server + endpoint, files=files)
 
     if response.status_code == 200:
@@ -28,7 +28,7 @@ def model_inference(url_server):
         with st.spinner("Загрузка модели для предсказания..."):
             load_model = LoadRequest(id=selected_model_info.id)
             load_json = load_model.model_dump()
-            response = requests.post(url_server + "/load", json=load_json)
+            response = requests.post(url_server + "models/load", json=load_json)
             st.success(f"Модель {selected_model_name} успешно подготовлена для предсказания")
     else:
         st.warning("Нет обученных моделей")
