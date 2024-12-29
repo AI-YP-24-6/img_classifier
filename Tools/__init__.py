@@ -2,29 +2,15 @@
 """
 Общий пакет для готовых функций.
 Модули в этом пакете:
-
 - `download`: Позволяет скачать и разархивировать датасет.
 - `parser`: Парсер сайта госкаталог.
 - `notebook`: Позволяет обновлять идентификаторы ячеек в ноутбуке.
 - `analysis`: Позволяет находить все jpeg-файлы в директории.
 """
-<<<<<<< HEAD
 from .analysis import display_images, find_image_files, find_needed_jpeg_files
 from .download import download_zip, extract_zip, get_ya_disk_url
 from .notebook import set_cell_id
 from .parser import goskatalog_parser, zip_files
-=======
-<<<<<<< HEAD
-from .analysis import display_images, find_needed_jpeg_files
-from .download import download_zip, extract_zip, get_ya_disk_url
-from .notebook import set_cell_id
-from .parser import goskatalog_parser, zip_files
-=======
-from .analysis import display_images, find_image_files, find_needed_jpeg_files
-from .download import download_zip, extract_zip, get_ya_disk_url
-from .notebook import set_cell_id
-from .parser import goskatalog_parser, zip_files
->>>>>>> feature-fastapi
 
 __all__ = [
     "display_images",
@@ -37,7 +23,3 @@ __all__ = [
     "goskatalog_parser",
     "zip_files",
 ]
-<<<<<<< HEAD
-=======
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
