@@ -1,13 +1,12 @@
 from http import HTTPStatus
-import asyncio
 from typing import Annotated, Any, Union
 from uuid import uuid4
-
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from sklearn.model_selection import learning_curve
 from sklearn.pipeline import Pipeline
+from multiprocessing import Process, Manager
 
 from Backend.app.api.models import (
     ApiResponse,
@@ -23,6 +22,7 @@ from Backend.app.api.models import (
 )
 from Backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
 from Backend.app.services.model_loader import load_model
+from Backend.app.services.model_trainer import train_model
 from Backend.app.services.pipeline import create_model
 from Backend.app.services.preprocessing import (
     load_colored_images_and_labels,
@@ -114,6 +114,8 @@ async def dataset_samples():
     description="Обучение модели",
 )
 async def fit(request: Annotated[FitRequest, "Параметры для обучения модели"]):
+    manager = Manager()
+    model_manager = manager.dict()
     try:
         preprocess_dataset((64, 64))
         new_model = create_model(request.config)
@@ -126,8 +128,19 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
             )
             curve = LearningCurvelInfo(test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
 
-        new_model.fit(images, labels)
         model_id = str(uuid4())
+        process = Process(target=train_model, args=(new_model, images, labels, model_id, model_manager))
+        process.start()
+        # Через 10 сек. обучение прервется, т.к. считается долгим
+        process.join(timeout=10)
+        if process.is_alive():
+            process.terminate()
+            raise HTTPException(status_code=HTTPStatus.REQUEST_TIMEOUT, detail="Время обучения модели истекло")
+
+        new_model = model_manager.get(model_id, None)
+        if new_model is None:
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Ошибка обучения модели!")
+
         models[model_id] = {
             "id": model_id,
             "model": new_model,
@@ -139,8 +152,6 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
         return ModelInfo(
             name=request.name, id=model_id, type=ModelType.custom, hyperparameters=request.config, learning_curve=curve
         )
-    except asyncio.TimeoutError:
-        raise HTTPException(status_code=HTTPStatus.REQUEST_TIMEOUT, detail="Время обучения модели истекло")
     except Exception as e:
         logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
