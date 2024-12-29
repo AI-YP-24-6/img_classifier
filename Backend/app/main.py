@@ -1,5 +1,6 @@
 import os
 import sys
+from dataclasses import dataclass
 from http import HTTPStatus
 
 import uvicorn
@@ -7,12 +8,18 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-from Backend.app.api.v1.api_route import router_models, router_dataset
+from Backend.app.api.v1.api_route import router_dataset, router_models
+
+# Импорт нужен для работы baseline
+from Backend.app.services.pipeline import HogTransformer  # pylint: disable=unused-import # noqa: F401
 
 LOG_FOLDER = "logs"
 
 
 def configure_logging():
+    """
+    Конфигурация loguru для правильного записывания логов и работы с uvicorn
+    """
     logger.remove()
     os.makedirs(LOG_FOLDER, exist_ok=True)
     logger.add(
@@ -29,9 +36,11 @@ def configure_logging():
         compression="zip",
     )
 
-    # Интеграция loguru с uvicorn
-    class InterceptHandler:
+    class InterceptHandler:  # pylint: disable=too-few-public-methods
         def write(self, message):
+            """
+            Интеграция loguru с uvicorn
+            """
             if message.strip():
                 logger.info(message.strip())
 
@@ -48,6 +57,7 @@ app = FastAPI(
 )
 
 
+@dataclass
 class StatusResponse(BaseModel):
     status: str
 
@@ -56,6 +66,9 @@ class StatusResponse(BaseModel):
 
 @app.get("/", response_model=StatusResponse, status_code=HTTPStatus.OK)
 async def root():
+    """
+    Возврат статуса работы сервиса
+    """
     return StatusResponse(status="App healthy")
 
 

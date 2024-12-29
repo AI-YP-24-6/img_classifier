@@ -1,12 +1,13 @@
 from http import HTTPStatus
-from typing import Annotated, Any, Union
+from multiprocessing import Manager, Process
+from typing import Annotated, Any
 from uuid import uuid4
+
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from sklearn.model_selection import learning_curve
 from sklearn.pipeline import Pipeline
-from multiprocessing import Process, Manager
 
 from Backend.app.api.models import (
     ApiResponse,
@@ -20,7 +21,7 @@ from Backend.app.api.models import (
     ProbabilityResponse,
     TableModel,
 )
-from Backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
+from Backend.app.services.analysis import check_dataset_uploaded, classes_info, colors_info, duplicates_info, sizes_info
 from Backend.app.services.model_loader import load_model
 from Backend.app.services.model_trainer import train_model
 from Backend.app.services.pipeline import create_model
@@ -33,9 +34,14 @@ from Backend.app.services.preprocessing import (
 from Backend.app.services.preview import preview_dataset, remove_preview
 
 models: dict[str, Any] = {}
-active_model: Union[Pipeline, None] = None
-active_model_info: Union[ModelInfo, None] = None
-dataset_info: Union[DatasetInfo, None] = None
+active_model = {"model": None, "info": None}
+dataset_info = DatasetInfo(
+    is_empty=True,
+    classes={},
+    duplicates={},
+    sizes=TableModel(columns=[], rows=[]),
+    colors=TableModel(columns=[], rows=[]),
+)
 
 
 router_models = APIRouter(prefix="/api/v1/models")
@@ -49,30 +55,32 @@ router_dataset = APIRouter(prefix="/api/v1/dataset")
     description="Загрузка датасета",
 )
 async def load_dataset(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
-    if file.filename.lower().endswith(".zip") == False:
+    """
+    Загрузка датасета.
+    На вход должен подаваться архив, содержащий папки с изображениями классов
+    """
+    if file.filename.lower().endswith(".zip") is False:
         logger.exception("Неверный формат файла. Должен загружаться zip-архив!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail="Неверный формат файла. Должен загружаться zip-архив!"
         )
-    global dataset_info
     try:
         archive = await file.read()
         # разархивировал каринки
         preprocess_archive(archive)
         # удалил прошлое превью, если было
         remove_preview()
-        classes = classes_info()
-        duplicates = duplicates_info()
-        sizes: TableModel = {"rows": sizes_info(), "columns": ["class", "name", "width", "height"]}
-        colors: TableModel = {
-            "rows": colors_info(),
-            "columns": ["class", "name", "mean_R", "mean_G", "mean_B", "std_R", "std_G", "std_B"],
-        }
-        dataset_info = DatasetInfo(classes=classes, duplicates=duplicates, sizes=sizes, colors=colors)
+        dataset_info.classes = classes_info()
+        dataset_info.duplicates = duplicates_info()
+        dataset_info.sizes = TableModel(rows=sizes_info(), columns=["class", "name", "width", "height"])
+        dataset_info.colors = TableModel(
+            rows=colors_info(), columns=["class", "name", "mean_R", "mean_G", "mean_B", "std_R", "std_G", "std_B"]
+        )
+        dataset_info.is_empty = False
         return dataset_info
     except Exception as e:
         logger.error(str(e))
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
 
 @router_dataset.get(
@@ -82,10 +90,22 @@ async def load_dataset(file: Annotated[UploadFile, File(..., description="Ари
     description="Получение информации о датасете",
 )
 async def get_dataset_info():
-    global dataset_info
-    if dataset_info is None:
+    """
+    Получение информации о датасете
+    Возвращается количество изображений в каждом класса, дубли, таблица размеров и цветов
+    """
+    dataset_uploaded = check_dataset_uploaded()
+    if dataset_uploaded is False:
         # Не логгируется, т.к. не ошибка
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нет загруженного набора данных!")
+    if dataset_info.is_empty:
+        dataset_info.classes = classes_info()
+        dataset_info.duplicates = duplicates_info()
+        dataset_info.sizes = TableModel(rows=sizes_info(), columns=["class", "name", "width", "height"])
+        dataset_info.colors = TableModel(
+            rows=colors_info(), columns=["class", "name", "mean_R", "mean_G", "mean_B", "std_R", "std_G", "std_B"]
+        )
+        dataset_info.is_empty = False
     return dataset_info
 
 
@@ -96,7 +116,10 @@ async def get_dataset_info():
     description="Изображения из классов",
 )
 async def dataset_samples():
-    if dataset_info is None:
+    """
+    Возвращает картинку с примерами изображений по каждому классу
+    """
+    if dataset_info.is_empty:
         logger.exception("Нет загруженного набора данных!")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нет загруженного набора данных!")
     try:
@@ -104,7 +127,7 @@ async def dataset_samples():
         return StreamingResponse(buffer, media_type="image/png")
     except Exception as e:
         logger.error(str(e))
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
 
 @router_models.post(
@@ -114,6 +137,11 @@ async def dataset_samples():
     description="Обучение модели",
 )
 async def fit(request: Annotated[FitRequest, "Параметры для обучения модели"]):
+    """
+    Обучение модели. По истечении 10 сеукнд обучение прерывается.
+    Есть возможность дополнительно получить кривую обучения, указав `with_learning_curve=True`
+    Также для обучения модели передаются гиперпараметры вида `pca__` и `svc__`
+    """
     manager = Manager()
     model_manager = manager.dict()
     try:
@@ -154,7 +182,7 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
         )
     except Exception as e:
         logger.error(str(e))
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
 
 @router_models.post(
@@ -164,17 +192,20 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
     description="Предсказание класса",
 )
 async def predict(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
-    global active_model
-    if active_model is None:
+    """
+    Предсказание изображенного фрукта или овоща
+    """
+    if active_model.get("model", None) is None:
         logger.exception("Не выбрана модель")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Не выбрана модель")
     try:
         contents = await file.read()
         image = preprocess_image(contents)
-        return PredictionResponse(prediction=active_model.predict([image])[0])
+        model: Pipeline = active_model["model"]
+        return PredictionResponse(prediction=model.predict([image])[0])
     except Exception as e:
         logger.error(str(e))
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
 
 @router_models.post(
@@ -183,20 +214,23 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
     status_code=HTTPStatus.OK,
     description="Предсказание класса с вероятностью",
 )
-async def predict(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
-    global active_model
-    if active_model is None:
+async def predict_proba(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
+    """
+    Предсказание с вероятностью изображенного фрукта или овоща
+    """
+    if active_model.get("model", None) is None:
         logger.exception("Не выбрана модель")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Не выбрана модель")
     try:
         contents = await file.read()
         image = preprocess_image(contents)
-        probability = max(active_model.predict_proba([image])[0])
-        prediction = active_model.predict([image])[0]
+        model: Pipeline = active_model["model"]
+        probability = max(model.predict_proba([image])[0])
+        prediction = model.predict([image])[0]
         return ProbabilityResponse(prediction=prediction, probability=probability)
     except Exception as e:
         logger.error(str(e))
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
 
 @router_models.post(
@@ -206,37 +240,41 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
     description="Загрузка baiseline-модели",
 )
 async def load_baseline():
-    global active_model
-    global active_model_info
+    """
+    Загрузка baseline-модели для работы с ней
+    В первый раз загружается из picke-файла, затем - из памяти
+    """
     if "baseline" in models:
-        active_model = models["baseline"]["model"]
-        active_model_info = ModelInfo(
+        info = ModelInfo(
             id="baseline",
             hyperparameters=models["baseline"]["hyperparameters"],
             type=ModelType.baseline,
             name="Baseline",
             learning_curve=None,
         )
-    else:
-        baseline = load_model()
-        model_info = {
-            "id": "baseline",
-            "type": ModelType.baseline,
-            "hyperparameters": {"pca__n_components": 0.6},
-            "model": baseline,
-            "name": "Baseline",
-            "learning_curve": None,
-        }
-        active_model = baseline
-        models["baseline"] = model_info
-        active_model_info = ModelInfo(
-            id="baseline",
-            hyperparameters=model_info["hyperparameters"],
-            type=ModelType.baseline,
-            name="Baseline",
-            learning_curve=None,
-        )
-    return active_model_info
+        active_model["model"] = models["baseline"]["model"]
+        active_model["info"] = info
+        return info
+    baseline = load_model()
+    baseline_info = {
+        "id": "baseline",
+        "type": ModelType.baseline,
+        "hyperparameters": {"pca__n_components": 0.6},
+        "model": baseline,
+        "name": "Baseline",
+        "learning_curve": None,
+    }
+    models["baseline"] = baseline_info
+    info = ModelInfo(
+        id="baseline",
+        hyperparameters=baseline_info["hyperparameters"],
+        type=ModelType.baseline,
+        name="Baseline",
+        learning_curve=None,
+    )
+    active_model["model"] = baseline
+    active_model["info"] = info
+    return info
 
 
 @router_models.post(
@@ -246,31 +284,26 @@ async def load_baseline():
     description="Загрузка одной из моделей",
 )
 async def load(request: LoadRequest):
-    global active_model
-    global active_model_info
-    if request.id in models:
-        model = models[request.id]
-        active_model = model["model"]
-        active_model_info = {
-            "id": request.id,
-            "hyperparameters": model["hyperparameters"],
-            "type": model["type"],
-            "learning_curve": model["learning_curve"],
-            "name": model["name"],
-        }
-        return ModelInfo(
-            id=request.id,
-            hyperparameters=model["hyperparameters"],
-            type=model["type"],
-            learning_curve=model["learning_curve"],
-            name=model["name"],
-        )
-    else:
+    """
+    Загрузка пользовательской модели для использования. Модель загружается по id
+    """
+    if request.id not in models:
         logger.exception(f"Модель '{request.id}' не была найдена!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=f"Модель '{request.id}' не была найдена!",
         )
+    model = models[request.id]
+    info = ModelInfo(
+        id=request.id,
+        hyperparameters=model["hyperparameters"],
+        type=model["type"],
+        learning_curve=model["learning_curve"],
+        name=model["name"],
+    )
+    active_model["model"] = model["model"]
+    active_model["info"] = info
+    return info
 
 
 @router_models.post(
@@ -280,10 +313,12 @@ async def load(request: LoadRequest):
     description="Выгрузка модели из памяти",
 )
 async def unload():
-    global active_model
-    global active_model_info
-    active_model = None
-    active_model_info = None
+    """
+    Выгрузка модели.
+    Если модель была выгружена, то предсказания не будут работать пока не загрузят новую модель
+    """
+    active_model["model"] = None
+    active_model["info"] = None
     return ApiResponse(message="Модель выгружена из памяти")
 
 
@@ -294,15 +329,18 @@ async def unload():
     description="Получение списка моделей",
 )
 async def list_models():
+    """
+    Возврат списка всех доступных моделей
+    """
     return {
-        key: ModelInfo(
-            id=key,
-            type=models[key]["type"],
-            hyperparameters=models[key]["hyperparameters"],
-            learning_curve=models[key]["learning_curve"],
-            name=models[key]["name"],
+        id: ModelInfo(
+            id=id,
+            type=model["type"],
+            hyperparameters=model["hyperparameters"],
+            learning_curve=model["learning_curve"],
+            name=model["name"],
         )
-        for key in models.keys()
+        for id, model in models.items()
     }
 
 
@@ -313,21 +351,29 @@ async def list_models():
     description="Получение информации о модели",
 )
 async def model_info(model_id: Annotated[str, "Id модели"]):
-    if model_id in models:
-        model = models[model_id]
-        return ModelInfo(
-            id=model["id"],
-            type=model["type"],
-            hyperparameters=model["hyperparameters"],
-            learning_curve=model["learning_curve"],
-            name=model["name"],
-        )
-    else:
+    """
+    Возвращает информацию по модели с указанным id.
+    В информацию входит:
+    - id
+    - тип модели (baseline/custom)
+    - гиперпараметры (какие были использованы при обучении)
+    - кривая обучения (если получалась при обучении)
+    - пользовательское название модели
+    """
+    if model_id not in models:
         logger.exception(f"Модель '{model_id}' не была найдена!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=f"Модель '{model_id}' не была найдена!",
         )
+    model = models[model_id]
+    return ModelInfo(
+        id=model["id"],
+        type=model["type"],
+        hyperparameters=model["hyperparameters"],
+        learning_curve=model["learning_curve"],
+        name=model["name"],
+    )
 
 
 @router_models.delete(
@@ -337,21 +383,23 @@ async def model_info(model_id: Annotated[str, "Id модели"]):
     description="Удалиние модели",
 )
 async def remove(model_id: Annotated[str, "Id модели, которую нужно удалить"]):
-    if model_id in models.keys():
-        del models[model_id]
-        return {
-            key: ModelInfo(
-                id=key,
-                type=models[key]["type"],
-                hyperparameters=models[key]["hyperparameters"],
-                learning_curve=models[key]["learning_curve"],
-                name=models[key]["name"],
-            )
-            for key in models.keys()
-        }
-    else:
+    """
+    Удалит модель из памяти, ее больше нельзя будет загрузить для работы
+    """
+    if model_id not in models:
         logger.exception(f"Нет модели с id '{model_id}'")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
+    del models[model_id]
+    return {
+        id: ModelInfo(
+            id=id,
+            type=model["type"],
+            hyperparameters=model["hyperparameters"],
+            learning_curve=model["learning_curve"],
+            name=model["name"],
+        )
+        for id, model in models.items()
+    }
 
 
 @router_models.delete(
@@ -361,6 +409,8 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
     description="Удаление всех моделей",
 )
 async def remove_all():
-    global models
-    models = {}
-    return ApiResponse(message=f"Все модели удалены")
+    """
+    Полностью удалит все модели, очистка списка моделей
+    """
+    models.clear()
+    return ApiResponse(message="Все модели удалены")
