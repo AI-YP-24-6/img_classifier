@@ -132,7 +132,7 @@ def model_training_page(url_server):
     fit_json = fit_request_data.model_dump()
     if st.button(f":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
-            response = requests.post(url_server + "modles/fit", json=fit_json)
+            response = requests.post(url_server + "models/fit", json=fit_json)
 
             if response.status_code == 201:
                 try:
