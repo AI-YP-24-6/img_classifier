@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import asyncio
 from typing import Annotated, Any, Union
 from uuid import uuid4
 
@@ -37,16 +38,17 @@ active_model_info: Union[ModelInfo, None] = None
 dataset_info: Union[DatasetInfo, None] = None
 
 
-router = APIRouter(prefix="/api/v1/models")
+router_models = APIRouter(prefix="/api/v1/models")
+router_dataset = APIRouter(prefix="/api/v1/dataset")
 
 
-@router.post(
-    "/load_dataset",
+@router_dataset.post(
+    "/load",
     response_model=Annotated[DatasetInfo, "Информация о датасете"],
     status_code=HTTPStatus.CREATED,
     description="Загрузка датасета",
 )
-async def fit(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
+async def load_dataset(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
     if file.filename.lower().endswith(".zip") == False:
         logger.exception("Неверный формат файла. Должен загружаться zip-архив!")
         raise HTTPException(
@@ -73,8 +75,8 @@ async def fit(file: Annotated[UploadFile, File(..., description="Арихв с �
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
-@router.get(
-    "/dataset_info",
+@router_dataset.get(
+    "/info",
     response_model=Annotated[DatasetInfo, "Информация о датасете"],
     status_code=HTTPStatus.OK,
     description="Получение информации о датасете",
@@ -87,8 +89,8 @@ async def get_dataset_info():
     return dataset_info
 
 
-@router.get(
-    "/dataset_samples",
+@router_dataset.get(
+    "/samples",
     response_class=Annotated[StreamingResponse, "Пример с изображениями"],
     status_code=HTTPStatus.OK,
     description="Изображения из классов",
@@ -105,7 +107,7 @@ async def dataset_samples():
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
-@router.post(
+@router_models.post(
     "/fit",
     response_model=Annotated[ModelInfo, "Информация об обученной модели"],
     status_code=HTTPStatus.CREATED,
@@ -137,12 +139,14 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
         return ModelInfo(
             name=request.name, id=model_id, type=ModelType.custom, hyperparameters=request.config, learning_curve=curve
         )
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=HTTPStatus.REQUEST_TIMEOUT, detail="Время обучения модели истекло")
     except Exception as e:
         logger.error(str(e))
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
-@router.post(
+@router_models.post(
     "/predict",
     response_model=Annotated[PredictionResponse, "Предсказание"],
     status_code=HTTPStatus.OK,
@@ -162,7 +166,7 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
-@router.post(
+@router_models.post(
     "/predict_proba",
     response_model=Annotated[ProbabilityResponse, "Предсказание с вероятностью"],
     status_code=HTTPStatus.OK,
@@ -184,7 +188,7 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
 
-@router.post(
+@router_models.post(
     "/load_baseline",
     response_model=Annotated[ModelInfo, "Информация о baseline-модели"],
     status_code=HTTPStatus.OK,
@@ -224,7 +228,7 @@ async def load_baseline():
     return active_model_info
 
 
-@router.post(
+@router_models.post(
     "/load",
     response_model=Annotated[ModelInfo, "Информация о выбранной модели"],
     status_code=HTTPStatus.OK,
@@ -254,12 +258,11 @@ async def load(request: LoadRequest):
         logger.exception(f"Модель '{request.id}' не была найдена!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Модель '{
-                            request.id}' не была найдена!",
+            detail=f"Модель '{request.id}' не была найдена!",
         )
 
 
-@router.post(
+@router_models.post(
     "/unload",
     response_model=Annotated[ApiResponse, "Сообщение о выгрузке модели"],
     status_code=HTTPStatus.OK,
@@ -273,7 +276,7 @@ async def unload():
     return ApiResponse(message="Модель выгружена из памяти")
 
 
-@router.get(
+@router_models.get(
     "/list_models",
     response_model=Annotated[dict[str, ModelInfo], "Информация о моделях на сервере"],
     status_code=HTTPStatus.OK,
@@ -292,7 +295,7 @@ async def list_models():
     }
 
 
-@router.get(
+@router_models.get(
     "/info/{model_id}",
     response_model=Annotated[ModelInfo, "Информация о модели"],
     status_code=HTTPStatus.OK,
@@ -312,12 +315,11 @@ async def model_info(model_id: Annotated[str, "Id модели"]):
         logger.exception(f"Модель '{model_id}' не была найдена!")
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=f"Модель '{
-                            model_id}' не была найдена!",
+            detail=f"Модель '{model_id}' не была найдена!",
         )
 
 
-@router.delete(
+@router_models.delete(
     "/remove/{model_id}",
     response_model=Annotated[dict[str, ModelInfo], "Оставшиеся модели"],
     status_code=HTTPStatus.OK,
@@ -341,7 +343,7 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
 
 
-@router.delete(
+@router_models.delete(
     "/remove_all",
     response_model=Annotated[ApiResponse, "Сообщение об успешном удалении"],
     status_code=HTTPStatus.OK,

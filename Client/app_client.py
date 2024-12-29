@@ -6,7 +6,7 @@ from model_inference import model_inference
 from model_training_page import model_training_page
 
 if "url_server" not in st.session_state:
-    st.session_state.url_server = "http://127.0.0.1:8081/api/v1/models"
+    st.session_state.url_server = "http://127.0.0.1:8081/api/v1"
 
 st.title("Сервис обучения моделей для классификации фруктов и овощей")
 

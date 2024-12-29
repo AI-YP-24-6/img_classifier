@@ -57,12 +57,12 @@ def show_model_statistics(model_info):
 
 
 def delete_model(url_server, model_id):
-    response = requests.delete(url_server + f"/remove/{model_id}")
+    response = requests.delete(url_server + f"models/remove/{model_id}")
     return True
 
 
 def delete_all_models(url_server):
-    response = requests.delete(url_server + "/remove_all")
+    response = requests.delete(url_server + "modles/remove_all")
     return True
 
 
@@ -70,7 +70,7 @@ def get_models_list(url_server):
     try:
         with st.spinner("Загрузка списка моделей..."):
             model_info_list = []
-            response = requests.get(url_server + "/list_models")
+            response = requests.get(url_server + "models/list_models")
             model_data = response.json()
             if not model_data:
                 st.warning("Список моделей пуст.")
@@ -132,7 +132,7 @@ def model_training_page(url_server):
     fit_json = fit_request_data.model_dump()
     if st.button(f":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
-            response = requests.post(url_server + "/fit", json=fit_json)
+            response = requests.post(url_server + "modles/fit", json=fit_json)
 
             if response.status_code == 201:
                 try:
