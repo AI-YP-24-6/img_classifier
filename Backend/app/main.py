@@ -42,7 +42,7 @@ configure_logging()
 
 
 app = FastAPI(
-    title="model_trainer",
+    title="Классификатор изображений фруктов и овощей",
     docs_url="/api/openapi",
     openapi_url="/api/openapi.json",
 )
