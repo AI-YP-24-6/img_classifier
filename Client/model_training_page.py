@@ -52,29 +52,58 @@ def show_model_statistics(model_info):
     if learning_curve is not None:
         st.subheader("Поученные кривые обучения")
         plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
-    
-def model_training_page(url_server):
-    st.subheader("Выбор существующих моделей")
+
+def delete_model(url_server,model_id):
+    response = requests.delete(url_server + f"/remove/{model_id}")
+    return True
+
+def delete_all_models(url_server):
+    response = requests.delete(url_server + "/remove_all")
+    return True
+
+def get_models_list(url_server):
     try:
         with st.spinner("Загрузка списка моделей..."):
+            model_info_list = []
             response = requests.get(url_server + '/list_models')
             model_data = response.json()
             if not model_data:
                 st.warning("Список моделей пуст.")
             else:
-                model_info_list = []
                 for _, model_info in model_data.items():
                     model_info_list.append(ModelInfo(**model_info))
-                
-                st.session_state.model_info_list = model_info_list
-                model_names = [model.name for model in model_info_list]
-                selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
-                selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
-                show_model_statistics(selected_model_info)
-                
-            
+            return model_info_list
     except Exception as e:
-        st.error(f"На сервере ошибка {e}")
+        print(f'Ошибка получения списка моделей')
+        
+    
+def model_training_page(url_server):
+    st.subheader("Выбор существующих моделей")
+    model_info_list = get_models_list(url_server)
+    
+    if len(model_info_list) != 0:
+        model_names = [model.name for model in model_info_list]
+        selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
+        selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
+        show_model_statistics(selected_model_info)
+                
+        if st.button(f"Удалить модель {selected_model_name}"):
+            delete_model(url_server, selected_model_info.id)
+            st.success(f"Модель {selected_model_name} была удалена.")
+
+            model_info_list = [model for model in model_info_list if model.name != selected_model_name]
+            st.rerun()
+            # st.warning("Список моделей пуст.")
+            
+
+        if st.button("Удалить все модели"):
+            delete_all_models(url_server)
+            st.success("Все модели были удалены.")
+            st.rerun()
+            # model_names = []
+            # selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
+    # else:
+    #     st.warning("Список моделей пуст.")
         
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
     
@@ -105,6 +134,7 @@ def model_training_page(url_server):
                     response_data = json.loads(response.text)
                     model_info = ModelInfo(**response_data)
                     show_model_statistics(model_info)
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Ошибка при парсинге ответа: {e}")
             else:
