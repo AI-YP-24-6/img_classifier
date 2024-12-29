@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-DATASET_DIR = "temp"
+DATASET_DIR = "data/raw"
 
 
 def classes_info() -> dict[str, int]:

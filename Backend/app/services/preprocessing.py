@@ -7,7 +7,8 @@ import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
-TEMP_DIR = "temp"
+TEMP_DIR = "data/temp"
+DATASET_DIR = "data/raw"
 
 
 def preprocess_image(file: bytes):
@@ -22,12 +23,14 @@ def preprocess_image(file: bytes):
 
 
 def preprocess_archive(file: bytes):
+    if os.path.exists(DATASET_DIR):
+        shutil.rmtree(DATASET_DIR)
+    # Если был обработанный датасет, то тоже удалить его, т.к. будет новый
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
-
     try:
         with zipfile.ZipFile(io.BytesIO(file), "r") as zip_ref:
-            zip_ref.extractall(TEMP_DIR)
+            zip_ref.extractall(DATASET_DIR)
     except Exception as e:
         raise ValueError(f"Ошибка разархивирования: {e}")
 
@@ -51,18 +54,21 @@ def set_image_size(img_path: str, save_path: str, size: tuple[int, int]):
 
 
 def preprocess_dataset(size: tuple[int, int]):
-    # Если папка уже была, то удалить из нее прошлое содержимое
-    classes = os.listdir(TEMP_DIR)
-    for cl in classes:
-        temp_cl_path = os.path.join(TEMP_DIR, cl)
-        if os.path.exists(temp_cl_path) == False:
-            os.mkdir(temp_cl_path)
-        folder_path = os.path.join(TEMP_DIR, cl)
-        image_names = os.listdir(folder_path)
-        for img_name in image_names:
-            img_path = os.path.join(TEMP_DIR, cl, img_name)
-            # датасет будет грузиться 1 раз для обучения, ради экономии места перезаписываем старую картинку
-            set_image_size(img_path, img_path, size)
+    if os.path.exists(TEMP_DIR) == False:
+        os.mkdir(TEMP_DIR)
+    if len(os.listdir(TEMP_DIR)) == 0:
+        classes = os.listdir(DATASET_DIR)
+        for cl in classes:
+            temp_cl_path = os.path.join(TEMP_DIR, cl)
+            if os.path.exists(temp_cl_path) == False:
+                os.mkdir(temp_cl_path)
+            folder_path = os.path.join(DATASET_DIR, cl)
+            image_names = os.listdir(folder_path)
+            for img_name in image_names:
+                img_path = os.path.join(DATASET_DIR, cl, img_name)
+                save_path = os.path.join(TEMP_DIR, cl, img_name)
+                # датасет будет грузиться 1 раз для обучения, ради экономии места перезаписываем старую картинку
+                set_image_size(img_path, save_path, size)
 
 
 def load_colored_images_and_labels():
