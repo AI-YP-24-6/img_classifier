@@ -62,7 +62,7 @@ def delete_model(url_server, model_id):
 
 
 def delete_all_models(url_server):
-    response = requests.delete(url_server + "modles/remove_all")
+    response = requests.delete(url_server + "models/remove_all")
     return True
 
 
