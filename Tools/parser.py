@@ -90,34 +90,15 @@ def download_art(art: dict, path: Path, session: requests.Session) -> None:
     data_json = session.get(data_url).json()
     try:
         image_name = data_json.get("images")[0].get("fileName")
-<<<<<<< HEAD
-    except IndexError as e:
-=======
-<<<<<<< HEAD
-    except IndexError:
->>>>>>> feature-fastapi
-        image_name = art.get("mainImage").get("code")
-        if not image_name:
-            raise IndexError from e
-
-<<<<<<< HEAD
-=======
-    image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{art.get('mainImage')['code']}?originalName={image_name}"
-=======
     except IndexError as e:
         image_name = art.get("mainImage").get("code")
         if not image_name:
             raise IndexError from e
 
->>>>>>> feature-fastapi
     image_url = (
         f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{art.get('mainImage')['code']}"
         f"?originalName={image_name}"
     )
-<<<<<<< HEAD
-=======
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
     image = session.get(image_url)
     image.raise_for_status()
 
@@ -128,15 +109,7 @@ def download_art(art: dict, path: Path, session: requests.Session) -> None:
     path_json = (path / image_id).with_suffix(".json")
 
     path_image.write_bytes(image.content)
-<<<<<<< HEAD
     with open(path_json, "w", encoding="utf-8") as file:
-=======
-<<<<<<< HEAD
-    with open(path_json, "w") as file:
-=======
-    with open(path_json, "w", encoding="utf-8") as file:
->>>>>>> 3d25aabb8347edce5a9e182f4e9b2083f9459fc4
->>>>>>> feature-fastapi
         json.dump(data_json, file)
 
 
