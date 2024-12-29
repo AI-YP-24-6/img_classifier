@@ -72,7 +72,7 @@ def get_models_list(url_server):
             else:
                 for _, model_info in model_data.items():
                     model_info_list.append(ModelInfo(**model_info))
-                    
+
                 st.session_state.model_info_list = model_info_list
             return model_info_list
     except Exception as e:
@@ -133,7 +133,6 @@ def model_training_page(url_server):
                 try:
                     response_data = json.loads(response.text)
                     model_info = ModelInfo(**response_data)
-                    show_model_statistics(model_info)
                     st.session_state.selected_model_name = model_info.name
                     st.rerun()
                 except Exception as e:
