@@ -1,11 +1,11 @@
+import io
 import os
 import shutil
-import numpy as np
-from PIL import Image, ImageOps
-import io
 import zipfile
+
 import cv2
 import numpy as np
+from PIL import Image, ImageOps
 
 TEMP_DIR = "temp"
 
@@ -19,14 +19,14 @@ def preprocess_image(file: bytes):
         return np.array(image)
     except Exception as e:
         raise ValueError(f"Ошибка обработки файла: {e}")
-    
+
 
 def preprocess_archive(file: bytes):
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
-    
+
     try:
-        with zipfile.ZipFile(io.BytesIO(file), 'r') as zip_ref:
+        with zipfile.ZipFile(io.BytesIO(file), "r") as zip_ref:
             zip_ref.extractall(TEMP_DIR)
     except Exception as e:
         raise ValueError(f"Ошибка разархивирования: {e}")
@@ -34,8 +34,8 @@ def preprocess_archive(file: bytes):
 
 def set_image_size(img_path: str, save_path: str, size: tuple[int, int]):
     img = Image.open(img_path)
-    if img.mode != 'RGB':
-        img = img.convert('RGB')
+    if img.mode != "RGB":
+        img = img.convert("RGB")
     ratio = img.width / img.height
     # Широкое изображение
     if ratio > 1:

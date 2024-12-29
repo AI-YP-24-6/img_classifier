@@ -1,22 +1,20 @@
+from typing import Any, Optional, Union
+
 import cv2
+import numpy as np
 from PIL import Image, ImageOps
 from PIL.Image import Resampling
 from skimage.feature import hog
-
-from sklearn.svm import SVC
-from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
-
-from typing import Optional, Union, Any
-
-import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.svm import SVC
 
 
 def resize_image(image, size: tuple[int, int]) -> np.array:
     img = Image.fromarray(image)
-    if img.mode != 'RGB':
-        img = img.convert('RGB')
+    if img.mode != "RGB":
+        img = img.convert("RGB")
     ratio = img.width / img.height
     # Широкое изображение
     if ratio > 1:
@@ -31,7 +29,9 @@ def resize_image(image, size: tuple[int, int]) -> np.array:
     return np.array(img_padded)
 
 
-def extract_hog_color_features(images, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), size=(64, 64)) -> np.array:
+def extract_hog_color_features(
+    images, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), size=(64, 64)
+) -> np.array:
     hog_features = []
     for image in images:
         img_hog_features = []
@@ -42,8 +42,8 @@ def extract_hog_color_features(images, orientations=9, pixels_per_cell=(8, 8), c
                 orientations=orientations,
                 pixels_per_cell=pixels_per_cell,
                 cells_per_block=cells_per_block,
-                block_norm='L2-Hys',
-                visualize=False
+                block_norm="L2-Hys",
+                visualize=False,
             )
             img_hog_features.append(features)
         hog_features.append(np.hstack(img_hog_features))
@@ -66,7 +66,7 @@ class HogTransformer(BaseEstimator, TransformerMixin):
             orientations=self.orientations,
             pixels_per_cell=self.pixels_per_cell,
             cells_per_block=self.cells_per_block,
-            size=self.size
+            size=self.size,
         )
 
     def predict(self, X: list[list[float]]) -> np.array:

@@ -1,19 +1,16 @@
-from http import HTTPStatus
 import os
 import sys
-from loguru import logger
+from contextlib import asynccontextmanager
+from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI
+from loguru import logger
 from pydantic import BaseModel, ConfigDict
-from contextlib import asynccontextmanager
 
 from backend.app.api.v1.api_route import router
-from backend.app.services.model_loader import load_model
-from backend.app.services.pipeline import HogTransformer
 
-
-LOG_FOLDER = 'logs'
+LOG_FOLDER = "logs"
 
 
 def configure_logging():
@@ -22,15 +19,15 @@ def configure_logging():
     logger.add(
         sys.stdout,
         colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level}</level>| {message}"
+        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level}</level>| {message}",
     )
     logger.add(
         os.path.join(LOG_FOLDER, "backend.log"),
         colorize=True,
         format="{time} | {level} | {message}",
-        rotation='10 MB',
-        retention='10 days',
-        compression='zip'
+        rotation="10 MB",
+        retention="10 days",
+        compression="zip",
     )
 
     # Интеграция loguru с uvicorn
@@ -38,6 +35,7 @@ def configure_logging():
         def write(self, message):
             if message.strip():
                 logger.info(message.strip())
+
     sys.stderr = InterceptHandler()
 
 
@@ -54,9 +52,7 @@ app = FastAPI(
 class StatusResponse(BaseModel):
     status: str
 
-    model_config = ConfigDict(
-        json_schema_extra={"examples": [{"status": "App healthy"}]}
-    )
+    model_config = ConfigDict(json_schema_extra={"examples": [{"status": "App healthy"}]})
 
 
 @asynccontextmanager

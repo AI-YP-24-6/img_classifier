@@ -1,24 +1,23 @@
-from io import BytesIO
 import os
 import random
+from io import BytesIO
+
 import matplotlib.pyplot as plt
 from PIL import Image
 
-DATASET_DIR = 'temp'
-PREVIEW_DIR = 'preview'
-PREVIEW_PATH = os.path.join(PREVIEW_DIR, 'preview.png')
+DATASET_DIR = "temp"
+PREVIEW_DIR = "preview"
+PREVIEW_PATH = os.path.join(PREVIEW_DIR, "preview.png")
 
 
 def plot_images(num_images=5):
     classes = os.listdir(DATASET_DIR)
-    fig, axs = plt.subplots(len(classes), num_images,
-                            figsize=(15, 5 * len(classes)))
+    fig, axs = plt.subplots(len(classes), num_images, figsize=(15, 5 * len(classes)))
     if len(classes) == 1:
         axs = [axs]
     for row, cl in enumerate(classes):
         folder_path = os.path.join(DATASET_DIR, cl)
-        image_files = random.sample(os.listdir(folder_path), min(
-            num_images, len(os.listdir(folder_path))))
+        image_files = random.sample(os.listdir(folder_path), min(num_images, len(os.listdir(folder_path))))
         for col, img_name in enumerate(image_files):
             img_path = os.path.join(folder_path, img_name)
             img = Image.open(img_path)
@@ -44,7 +43,7 @@ def remove_preview():
 
 def preview_dataset(num_images: int):
     if os.path.exists(PREVIEW_PATH):
-        with open(PREVIEW_PATH, 'rb') as f:
+        with open(PREVIEW_PATH, "rb") as f:
             buffer = BytesIO(f.read())
             return buffer
     else:

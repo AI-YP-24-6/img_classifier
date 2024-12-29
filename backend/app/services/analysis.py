@@ -1,16 +1,16 @@
 import hashlib
 import os
 from typing import Any
-from PIL import Image
-import numpy as np
 
-DATASET_DIR = 'temp'
+import numpy as np
+from PIL import Image
+
+DATASET_DIR = "temp"
 
 
 def classes_info() -> dict[str, int]:
     classes = os.listdir(DATASET_DIR)
-    class_counts = {cl: len(os.listdir(os.path.join(DATASET_DIR, cl)))
-                    for cl in classes}
+    class_counts = {cl: len(os.listdir(os.path.join(DATASET_DIR, cl))) for cl in classes}
     return class_counts
 
 
