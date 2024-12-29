@@ -79,31 +79,30 @@ def get_models_list(url_server):
     
 def model_training_page(url_server):
     st.subheader("Выбор существующих моделей")
+    if 'selected_model_name' not in st.session_state:
+        st.session_state.selected_model_name = ""
+
     model_info_list = get_models_list(url_server)
     
     if len(model_info_list) != 0:
         model_names = [model.name for model in model_info_list]
-        selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
+        selected_model_name = st.selectbox("Выберите уже обученную модель",
+        model_names,
+        index=model_names.index(st.session_state.selected_model_name) if st.session_state.selected_model_name in model_names else 0
+        )
+
         selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
         show_model_statistics(selected_model_info)
                 
         if st.button(f"Удалить модель {selected_model_name}"):
             delete_model(url_server, selected_model_info.id)
-            st.success(f"Модель {selected_model_name} была удалена.")
-
             model_info_list = [model for model in model_info_list if model.name != selected_model_name]
             st.rerun()
-            # st.warning("Список моделей пуст.")
             
 
         if st.button("Удалить все модели"):
             delete_all_models(url_server)
-            st.success("Все модели были удалены.")
             st.rerun()
-            # model_names = []
-            # selected_model_name = st.selectbox("Выберите уже обученную модель", model_names)
-    # else:
-    #     st.warning("Список моделей пуст.")
         
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
     
@@ -129,11 +128,11 @@ def model_training_page(url_server):
             response = requests.post(url_server + "/fit", json=fit_json)
         
             if response.status_code == 201:
-                st.success("Модель успешно обучена!")
                 try:
                     response_data = json.loads(response.text)
                     model_info = ModelInfo(**response_data)
                     show_model_statistics(model_info)
+                    st.session_state.selected_model_name = model_info.name
                     st.rerun()
                 except Exception as e:
                     st.error(f"Ошибка при парсинге ответа: {e}")
