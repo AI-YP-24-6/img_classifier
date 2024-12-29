@@ -8,7 +8,7 @@ from loguru import logger
 from sklearn.model_selection import learning_curve
 from sklearn.pipeline import Pipeline
 
-from backend.app.api.models import (
+from Backend.app.api.models import (
     ApiResponse,
     DatasetInfo,
     FitRequest,
@@ -20,16 +20,16 @@ from backend.app.api.models import (
     ProbabilityResponse,
     TableModel,
 )
-from backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
-from backend.app.services.model_loader import load_model
-from backend.app.services.pipeline import create_model
-from backend.app.services.preprocessing import (
+from Backend.app.services.analysis import classes_info, colors_info, duplicates_info, sizes_info
+from Backend.app.services.model_loader import load_model
+from Backend.app.services.pipeline import create_model
+from Backend.app.services.preprocessing import (
     load_colored_images_and_labels,
     preprocess_archive,
     preprocess_dataset,
     preprocess_image,
 )
-from backend.app.services.preview import preview_dataset, remove_preview
+from Backend.app.services.preview import preview_dataset, remove_preview
 
 models: dict[str, Any] = {}
 active_model: Union[Pipeline, None] = None

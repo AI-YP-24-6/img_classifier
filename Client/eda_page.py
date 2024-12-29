@@ -8,7 +8,7 @@ import requests
 import streamlit as st
 from PIL import Image
 
-from backend.app.api.models import DatasetInfo
+from Backend.app.api.models import DatasetInfo
 
 CLASS_DICT = {}
 

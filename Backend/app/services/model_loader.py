@@ -1,7 +1,7 @@
 import os
 import pickle
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "backend", "data", "baseline.pkl")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Backend", "data", "baseline.pkl")
 
 
 def load_model():

@@ -5,7 +5,7 @@ import numpy as np
 import requests
 import streamlit as st
 
-from backend.app.api.models import FitRequest, ModelInfo
+from Backend.app.api.models import FitRequest, ModelInfo
 
 
 def plt_learning_curve(train_sizes, train_scores, test_scores):
