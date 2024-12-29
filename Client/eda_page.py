@@ -70,7 +70,7 @@ def show_eda(url_server):
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
         st.subheader("Основные статистики:")
-        size_df = pd.DataFrame(dataset_info.sizes, columns=['class', 'name', 'width', 'height'])
+        size_df = pd.DataFrame(dataset_info.sizes.rows, columns=dataset_info.sizes.columns)
         st.write(f'**Средний размер изображений**: ширина: {round(size_df['width'].mean(),0)}, высота: {round(size_df['height'].mean(),0)}')
         
         st.subheader("График распределения изображений по классам:")
@@ -83,7 +83,7 @@ def show_eda(url_server):
             st.write("**Дубликатов нет**")
         
         st.subheader("Среднее значение и стандартное отклонение по каналам (R, G, B)")
-        rgb_df = pd.DataFrame(dataset_info.colors, columns=['class', 'name', 'mean_R', 'mean_G', 'mean_B', 'std_R', 'std_G', 'std_B'])
+        rgb_df = pd.DataFrame(dataset_info.colors.rows, columns=dataset_info.colors.columns)
         classes = rgb_df['class'].unique()
         cls = st.selectbox("Выберите класс", classes)
         show_bar_std_mean_rgb(rgb_df, cls)
