@@ -90,7 +90,9 @@ def model_training_page(url_server):
         model_names = [model.name for model in model_info_list]
         selected_model_name = st.selectbox("Выберите уже обученную модель",
         model_names,
-        index=model_names.index(st.session_state.selected_model_name) if st.session_state.selected_model_name in model_names else 0
+        index=model_names.index(st.session_state.selected_model_name)
+            if st.session_state.selected_model_name in model_names
+            else 0
         )
 
         selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)

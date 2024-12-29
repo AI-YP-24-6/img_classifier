@@ -41,7 +41,9 @@ def model_inference(url_server):
         if response_data:
             if selected_model_info.hyperparameters['svc__probability']:
                 prediction_info = ProbabilityResponse(**response_data)
-                st.markdown(f':green-background[**Я думаю это {prediction_info.prediction} с вероятностью {round(prediction_info.probability,2)*100} %**]')
+                st.markdown(f''':green-background[**Я думаю это {prediction_info.prediction}
+                            с вероятностью {round(prediction_info.probability,2)*100} %**]'''
+                            )
             else:
                 prediction_info = PredictionResponse(**response_data)
                 st.markdown(f':green-background[**Я думаю это {prediction_info.prediction}**]')

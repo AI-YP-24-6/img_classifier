@@ -71,7 +71,10 @@ def show_eda(url_server):
         dataset_info = DatasetInfo(**response_data)
         st.subheader("Основные статистики:")
         size_df = pd.DataFrame(dataset_info.sizes.rows, columns=dataset_info.sizes.columns)
-        st.write(f'**Средний размер изображений**: ширина: {round(size_df['width'].mean(),0)}, высота: {round(size_df['height'].mean(),0)}')
+        st.write(f'**Средний размер изображений**:
+                ширина: {round(size_df['width'].mean(),0)},
+                высота: {round(size_df['height'].mean(),0)}'
+                )
         
         st.subheader("График распределения изображений по классам:")
         bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
