@@ -4,22 +4,6 @@ import requests
 from backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
 import json
 
-SIZE_IMG = (20, 20)
-def set_image_size(img: Image) ->  Image:
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-    ratio = img.width / img.height
-    
-    if ratio > 1:
-        new_width = SIZE_IMG[0]
-        new_height = int(SIZE_IMG[0] / ratio)
-    
-    else:
-        new_height = SIZE_IMG[1]
-        new_width = int(SIZE_IMG[1] * ratio)
-        
-    return img.resize((new_width, new_height), Image.LANCZOS)
-
 def make_prediction(url_server, files, use_probability):
     endpoint = '/predict_proba' if use_probability else '/predict'
     response = requests.post(url_server + endpoint, files=files)
