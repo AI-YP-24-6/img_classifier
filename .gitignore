@@ -154,3 +154,4 @@ cython_debug/
 /Notebooks/goskatalog_art/
 *.zip
 */dataset/
+/temp/
