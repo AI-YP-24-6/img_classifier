@@ -6,7 +6,6 @@ from loguru import logger
 
 from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
 
-
 def make_prediction(url_server, files, use_probability):
     endpoint = "models/predict_proba" if use_probability else "models/predict"
     response = requests.post(url_server + endpoint, files=files)
@@ -47,10 +46,13 @@ def model_inference(url_server):
         st.image(uploaded_image, caption="Загруженное изображение", use_container_width=True)
 
         files = {"file": (uploaded_image.name, uploaded_image.getvalue(), uploaded_image.type)}
-        response_data = make_prediction(url_server, files, selected_model_info.hyperparameters["svc__probability"])
+        if selected_model_info.id == "baseline":
+            response_data = make_prediction(url_server, files, False)
+        else:
+            response_data = make_prediction(url_server, files, selected_model_info.hyperparameters["svc__probability"])
 
         if response_data:
-            if selected_model_info.hyperparameters["svc__probability"]:
+            if selected_model_info.id != "baseline" and selected_model_info.hyperparameters["svc__probability"]:
                 prediction_info = ProbabilityResponse(**response_data)
                 st.markdown(
                     f""":green-background[**Я думаю это {prediction_info.prediction}

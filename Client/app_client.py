@@ -35,6 +35,8 @@ def configure_logging():
                 logger.info(message.strip())
 
     sys.stderr = InterceptHandler()
+    
+configure_logging()
 
 
 if "url_server" not in st.session_state:

@@ -43,14 +43,14 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
 
 def show_model_statistics(model_info):
     st.subheader("Информация о модели")
+    hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
-        f"""
-                - **Название модели:** {model_info.name}
-                - **Параметр C =** {model_info.hyperparameters['svc__C']}
-                - **Ядро:** {model_info.hyperparameters['svc__kernel']}
-                - **Оценка вероятности:** {model_info.hyperparameters['svc__probability']}
-                """
+    f"""
+    **Название модели:** {model_info.name}  
+    **Гиперпараметры:** {hyperparams_str}
+    """,
     )
+
     logger.info("Для клиента отображена основная информация об обученной модели")
 
     learning_curve = model_info.learning_curve
@@ -111,12 +111,12 @@ def model_training_page(url_server):
 
         selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
         show_model_statistics(selected_model_info)
-
-        if st.button(f"Удалить модель {selected_model_name}"):
-            delete_model(url_server, selected_model_info.id)
-            model_info_list = [model for model in model_info_list if model.name != selected_model_name]
-            logger.info(f"Модель {selected_model_name} успешно удалена")
-            st.rerun()
+        if selected_model_info.id != "baseline":
+            if st.button(f"Удалить модель {selected_model_name}"):
+                delete_model(url_server, selected_model_info.id)
+                model_info_list = [model for model in model_info_list if model.name != selected_model_name]
+                logger.info(f"Модель {selected_model_name} успешно удалена")
+                st.rerun()
 
         if st.button("Удалить все модели"):
             delete_all_models(url_server)
