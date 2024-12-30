@@ -1,13 +1,14 @@
 import json
+from io import BytesIO
 
 import requests
 import streamlit as st
 from loguru import logger
 
-from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
+from Backend.app.api.models import LoadRequest, ModelInfo, PredictionResponse, ProbabilityResponse
 
 
-def make_prediction(url_server, files, use_probability):
+def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> dict:
     """Функция для получения предсказания на обученной моделе."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
@@ -31,7 +32,7 @@ def make_prediction(url_server, files, use_probability):
         return None
 
 
-def download_trained_model(url_server, selected_model_info):
+def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> bool:
     """Функция загрузки обученной модели на сервер"""
     with st.spinner("Загрузка модели для предсказания..."):
         try:
@@ -51,7 +52,7 @@ def download_trained_model(url_server, selected_model_info):
             return False
 
 
-def model_inference(url_server):
+def model_inference(url_server: str):
     """Функция для получения предсказания на обученной моделе."""
     st.header("Инференс с использованием обученной модели")
 

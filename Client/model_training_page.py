@@ -9,7 +9,7 @@ from loguru import logger
 from Backend.app.api.models import FitRequest, ModelInfo
 
 
-def plt_learning_curve(train_sizes, train_scores, test_scores):
+def plt_learning_curve(train_sizes: list[int], train_scores: list[float], test_scores: list[float]):
     """Функция для отображение графика кривых обучения модели."""
 
     train_scores_mean = np.mean(train_scores, axis=1)
@@ -43,7 +43,7 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
     logger.info("Построен график кривых обучения модели")
 
 
-def show_model_statistics(model_info):
+def show_model_statistics(model_info: ModelInfo):
     """Функция для отображение информации об обученной модели."""
 
     st.subheader("Информация о модели")
@@ -63,7 +63,7 @@ def show_model_statistics(model_info):
         plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
 
 
-def delete_model(url_server, model_id):
+def delete_model(url_server: str, model_id: str) -> bool:
     """Функция для удаления обученной модели."""
     response = requests.delete(url_server + f"models/remove/{model_id}")
     if response.status_code == 200:
@@ -71,7 +71,7 @@ def delete_model(url_server, model_id):
     return False
 
 
-def delete_all_models(url_server):
+def delete_all_models(url_server: str) -> bool:
     """Функция для удаления всех обученных моделей."""
     response = requests.delete(url_server + "models/remove_all")
     if response.status_code == 200:
@@ -79,7 +79,7 @@ def delete_all_models(url_server):
     return False
 
 
-def get_models_list(url_server):
+def get_models_list(url_server: str) -> list[ModelInfo]:
     """Функция для получения списка всех обученных моделей."""
     try:
         with st.spinner("Загрузка списка моделей..."):
@@ -114,7 +114,7 @@ def get_models_list(url_server):
         return None
 
 
-def show_models_list(url_server):
+def show_models_list(url_server: str):
     """Функция для отображения на странице списка обученных моделей с возможностью их выбора и удаления."""
     st.subheader("Выбор существующих моделей")
     if "selected_model_name" not in st.session_state:
@@ -122,7 +122,7 @@ def show_models_list(url_server):
 
     model_info_list = get_models_list(url_server)
 
-    if len(model_info_list) != 0:
+    if model_info_list is not None:
         model_names = [model.name for model in model_info_list]
         selected_model_name = st.selectbox(
             "Выберите уже обученную модель",
@@ -139,7 +139,6 @@ def show_models_list(url_server):
         if selected_model_info.id != "baseline":
             if st.button(f"Удалить модель {selected_model_name}"):
                 delete_model(url_server, selected_model_info.id)
-                model_info_list = [model for model in model_info_list if model.name != selected_model_name]
                 logger.info(f"Модель {selected_model_name} успешно удалена")
                 st.rerun()
 
@@ -149,7 +148,7 @@ def show_models_list(url_server):
             st.rerun()
 
 
-def show_forms_create_model(url_server):
+def show_forms_create_model(url_server: str):
     """Функция для отображения на странице формы подготовки модели для обучения."""
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
 
@@ -195,7 +194,7 @@ def show_forms_create_model(url_server):
                 logger.error("Превышено время ожидания ответа от сервера")
 
 
-def model_training_page(url_server):
+def model_training_page(url_server: str):
     """Функция для заполнения страницы с подготовкой модели для обучения."""
     show_models_list(url_server)
     show_forms_create_model(url_server)

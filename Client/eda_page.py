@@ -8,12 +8,13 @@ import plotly.graph_objects as go
 import requests
 import streamlit as st
 from loguru import logger
+from pandas import DataFrame
 from PIL import Image
 
 from Backend.app.api.models import DatasetInfo
 
 
-def show_bar(classes, counts):
+def show_bar(classes: list[str], counts: list[int]):
     """Функция для построения стобчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
@@ -25,7 +26,7 @@ def show_bar(classes, counts):
     plt.close()
 
 
-def show_images(url_server):
+def show_images(url_server: str):
     """Функция для отображения примеров изображений с каждого класса."""
     st.subheader("Примеры изображений по классам")
     try:
@@ -48,7 +49,7 @@ def show_images(url_server):
         st.error("Ошибка обработки изображения: Не удалось открыть изображение.")
 
 
-def show_bar_std_mean_rgb(rgb_df, cls):
+def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
     """Функция для отображение графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
@@ -78,7 +79,7 @@ def show_bar_std_mean_rgb(rgb_df, cls):
     logger.info(f"Отображение графика отклонений по каналам RGB для класса {cls}")
 
 
-def show_eda(url_server):
+def show_eda(url_server: str):
     """Функция для отображение основных статистик датасета."""
     try:
         response = requests.get(url_server + "dataset/info")
@@ -123,7 +124,7 @@ def show_eda(url_server):
         st.error("Ошибка получения EDA данных: Неверный формат данных.")
 
 
-def eda_page(url_server):
+def eda_page(url_server: str):
     """Функция для заполнения страницы с EDA."""
     st.header("EDA для датасета изображений")
     st.subheader("Загрузка данных")
