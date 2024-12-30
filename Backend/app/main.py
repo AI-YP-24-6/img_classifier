@@ -12,7 +12,6 @@ from Backend.app.api.v1.api_route import models, router_dataset, router_models
 
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
-from Backend.app.services.pipeline import HogTransformer  # pylint: disable=unused-import # noqa: F401
 
 LOG_FOLDER = "logs"
 
