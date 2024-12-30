@@ -3,8 +3,8 @@ from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel, ConfigDict
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from Backend.app.api.models import ModelType
 from Backend.app.api.v1.api_route import models, router_dataset, router_models
@@ -14,25 +14,22 @@ from Backend.app.services.model_loader import load_model
 from Tools.logger_config import configure_server_logging
 
 
-class Settings(BaseSettings):  # pylint: disable=too-few-public-methods
+class Settings(BaseSettings):
     """
-    Настройки адреса uvicorn
+    Класс загрузки и валидации настроек из .env
     """
 
-    uvicorn_host: str = "127.0.0.1"
-    uvicorn_port: int = 54545
+    model_config = SettingsConfigDict(
+        env_file="../../.env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
+    )
+    uvicorn_host: str = Field(
+        "127.0.0.1", validate_default=False, pattern="[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}"
+    )
+    uvicorn_port: int = Field(54545, validate_default=False, lt=65535, ge=0)
     uvicorn_reload: bool = False
-
-    class Config:  # pylint: disable=too-few-public-methods
-        """
-        Файл с переменными окружения
-        """
-
-        env_file = ".env"
 
 
 settings = Settings()
-
 
 configure_server_logging()
 
@@ -63,7 +60,7 @@ app = FastAPI(
 )
 
 
-class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
+class StatusResponse(BaseModel):
     """
     Статус работы сервиса
     """
@@ -83,7 +80,6 @@ async def root():
 
 app.include_router(router_dataset)
 app.include_router(router_models)
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.uvicorn_host, port=settings.uvicorn_port, reload=settings.uvicorn_reload)
