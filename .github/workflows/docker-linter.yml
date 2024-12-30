@@ -55,5 +55,5 @@ jobs:
           skip_unchanged: true
 
       - name: Fail build
-        if: ${{ GLOBAL_FAILED == true }}
+        if: ${{ $GLOBAL_FAILED == true }}
         run: exit 1
