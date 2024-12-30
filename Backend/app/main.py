@@ -97,6 +97,6 @@ app.include_router(router_models)
 
 if __name__ == "__main__":
     host = os.getenv("UVICORN_HOST", "127.0.0.1")
-    port = int(os.getenv("UVICORN_PORT", 54545))
-    reload = bool(os.getenv("UVICORN_RELOAD", False))
+    port = int(os.getenv("UVICORN_PORT", "54545"))
+    reload = bool(os.getenv("UVICORN_RELOAD", "False"))
     uvicorn.run("main:app", host=host, port=port, reload=reload)
