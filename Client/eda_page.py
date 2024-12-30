@@ -1,3 +1,4 @@
+import streamlit as st
 import json
 from io import BytesIO
 
@@ -6,8 +7,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import requests
-import streamlit as st
+
 from PIL import Image
+from loguru import logger
 
 from Backend.app.api.models import DatasetInfo
 
@@ -30,9 +32,12 @@ def show_images(url_server):
             response = requests.get(url_server + "dataset/samples")
             img = Image.open(BytesIO(response.content))
             st.image(img, caption="Загруженные изображения", use_container_width=True)
+            logger.info("Изображения успешно загружены и отображены для клиента")
 
     except Exception as e:
+        logger.error("Ошибка получение изображений с датасета")
         st.error(f"Ошибка получение изображений с датасета {e}")
+
 
 
 def show_bar_std_mean_rgb(rgb_df, cls):
@@ -62,6 +67,7 @@ def show_bar_std_mean_rgb(rgb_df, cls):
     fig.update_layout(xaxis_title="Каналы", yaxis_title="Значение пикселей", width=800, height=400)
 
     st.plotly_chart(fig)
+    logger.info(f"Отображение графика отклонений по каналам RGB для класса {cls}")
 
 
 def show_eda(url_server):
@@ -76,13 +82,16 @@ def show_eda(url_server):
             f"ширина: {round(size_df['width'].mean(), 0)}, "
             f"высота: {round(size_df['height'].mean(), 0)}"
         )
+        logger.info(f"Вывод основных статистик для датасета")
 
         st.subheader("График распределения изображений по классам:")
         bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
+        logger.info(f"Отображение графика распределения изображений по классам")
 
         if dataset_info.duplicates is not None:
             st.subheader("График распределения дубликатов по классам:")
             bar(dataset_info.duplicates.keys(), dataset_info.duplicates.values())
+            logger.info(f"Отображение графика распределения дубликатов по классам")
         else:
             st.write("**Дубликатов нет**")
 
@@ -93,6 +102,7 @@ def show_eda(url_server):
         show_bar_std_mean_rgb(rgb_df, cls)
 
     except Exception as e:
+        logger.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
         st.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
 
 
@@ -113,12 +123,15 @@ def eda_page(url_server):
             response = requests.post(url_server + "dataset/load", files=files)
             if response.status_code == 201:
                 st.session_state.uploaded_file = uploaded_file
-                st.success("Датасет успешно загружен на сервер")
+                st.success(f"Новый датасет {uploaded_file.name} успешно загружен на сервер")
+                logger.info("Датасет успешно загружен на сервер")
                 show_eda(url_server)
                 show_images(url_server)
             else:
+                logger.error(f"Произошла ошибка: {response.text}")
                 st.error(f"Произошла ошибка: {response.text}")
     elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
+        logger.info(f"На сервере уже есть датасет {st.session_state.uploaded_file.name}")
         st.subheader(f"**Датасет:** {st.session_state.uploaded_file.name}")
         show_eda(url_server)
         show_images(url_server)

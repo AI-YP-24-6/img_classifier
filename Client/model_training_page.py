@@ -37,6 +37,7 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
     plt.grid()
     st.pyplot(plt)
     plt.close()
+    logger.info("Построен график кривых обучения модели")
 
 
 def show_model_statistics(model_info):
@@ -49,10 +50,11 @@ def show_model_statistics(model_info):
                 - **Оценка вероятности:** {model_info.hyperparameters['svc__probability']}
                 """
     )
+    logger.info("Для клиента отображена основная информация об обученной модели")
 
     learning_curve = model_info.learning_curve
     if learning_curve is not None:
-        st.subheader("Поученные кривые обучения")
+        st.subheader("Полученные кривые обучения")
         plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
 
 
@@ -69,19 +71,23 @@ def delete_all_models(url_server):
 def get_models_list(url_server):
     try:
         with st.spinner("Загрузка списка моделей..."):
+            logger.info("Загрузка списка моделей с сервера")
             model_info_list = []
             response = requests.get(url_server + "models/list_models")
             model_data = response.json()
             if not model_data:
                 st.warning("Список моделей пуст.")
+                logger.info("Список моделей пуст")
             else:
                 for _, model_info in model_data.items():
                     model_info_list.append(ModelInfo(**model_info))
 
                 st.session_state.model_info_list = model_info_list
+                logger.info(f"Получен список обученных моделей {model_info_list}")
             return model_info_list
     except Exception as e:
-        print(f"Ошибка получения списка моделей")
+        logger.error("Ошибка получения списка моделей")
+        
 
 
 def model_training_page(url_server):
@@ -109,10 +115,12 @@ def model_training_page(url_server):
         if st.button(f"Удалить модель {selected_model_name}"):
             delete_model(url_server, selected_model_info.id)
             model_info_list = [model for model in model_info_list if model.name != selected_model_name]
+            logger.info(f"Модель {selected_model_name} успешно удалена")
             st.rerun()
 
         if st.button("Удалить все модели"):
             delete_all_models(url_server)
+            logger.info(f"Все обученные модели успешно удалены")
             st.rerun()
 
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
@@ -132,6 +140,7 @@ def model_training_page(url_server):
     fit_json = fit_request_data.model_dump()
     if st.button(f":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
+            logger.info(f"Обучение новой модели {name_model}")
             response = requests.post(url_server + "models/fit", json=fit_json)
 
             if response.status_code == 201:
@@ -140,7 +149,10 @@ def model_training_page(url_server):
                     model_info = ModelInfo(**response_data)
                     st.session_state.selected_model_name = model_info.name
                     st.rerun()
+                    logger.info(f"Модель {name_model} успешно обучена")
                 except Exception as e:
                     st.error(f"Ошибка при парсинге ответа: {e}")
+                    logger.error(f"Ошибка при парсинге ответа: {e}")
             else:
                 st.error(f"Произошла ошибка: {response.text}")
+                logger.error(f"Произошла ошибка: {response.text}")
