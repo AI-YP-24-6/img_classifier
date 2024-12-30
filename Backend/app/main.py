@@ -1,5 +1,6 @@
 import os
 import sys
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 import uvicorn
@@ -50,16 +51,10 @@ def configure_logging():
 configure_logging()
 
 
-app = FastAPI(
-    title="Классификатор изображений фруктов и овощей",
-    docs_url="/api/openapi",
-    openapi_url="/api/openapi.json",
-)
-
-
-@app.on_event("startup")
-def load_baseline_model():
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     """
+    Логика, выполняющаяся при старте и остановке приложения
     Загрузка baseline-модели при старте сервера
     """
     baseline_model = load_model()
@@ -71,6 +66,15 @@ def load_baseline_model():
         "name": "Baseline",
         "learning_curve": None,
     }
+    yield
+
+
+app = FastAPI(
+    title="Классификатор изображений фруктов и овощей",
+    docs_url="/api/openapi",
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan,
+)
 
 
 class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
