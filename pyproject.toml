@@ -28,6 +28,7 @@ scikit-learn = "^1.6.0"
 opencv-python = "^4.10.0.84"
 python-multipart = "^0.0.20"
 loguru = "^0.7.3"
+pydantic-settings = "^2.7.0"
 
 
 [tool.poetry.group.client.dependencies]

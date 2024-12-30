@@ -1,10 +1,10 @@
-import os
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict
+from pydantic_settings import BaseSettings
 
 from Backend.app.api.models import ModelType
 from Backend.app.api.v1.api_route import models, router_dataset, router_models
@@ -12,6 +12,27 @@ from Backend.app.api.v1.api_route import models, router_dataset, router_models
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
 from Tools.logger_config import configure_server_logging
+
+
+class Settings(BaseSettings):  # pylint: disable=too-few-public-methods
+    """
+    Настройки адреса uvicorn
+    """
+
+    uvicorn_host: str = "127.0.0.1"
+    uvicorn_port: int = 54545
+    uvicorn_reload: bool = False
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """
+        Файл с переменными окружения
+        """
+
+        env_file = ".env"
+
+
+settings = Settings()
+
 
 configure_server_logging()
 
@@ -63,8 +84,6 @@ async def root():
 app.include_router(router_dataset)
 app.include_router(router_models)
 
+
 if __name__ == "__main__":
-    host = os.getenv("UVICORN_HOST", "127.0.0.1")
-    port = int(os.getenv("UVICORN_PORT", "54545"))
-    reload = bool(os.getenv("UVICORN_RELOAD", "False"))
-    uvicorn.run("main:app", host=host, port=port, reload=reload)
+    uvicorn.run("main:app", host=settings.uvicorn_host, port=settings.uvicorn_port, reload=settings.uvicorn_reload)
