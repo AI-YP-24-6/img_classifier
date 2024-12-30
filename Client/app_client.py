@@ -1,10 +1,9 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
-
 from eda_page import eda_page
+from loguru import logger
 from model_inference import model_inference
 from model_training_page import model_training_page
-from loguru import logger
+from streamlit_option_menu import option_menu
 
 LOG_FOLDER = "logs"
 
@@ -32,6 +31,7 @@ def configure_logging():
                 logger.info(message.strip())
 
     sys.stderr = InterceptHandler()
+
 
 if "url_server" not in st.session_state:
     st.session_state.url_server = "http://127.0.0.1:8081/api/v1"

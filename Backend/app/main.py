@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-from Backend.app.api.v1.api_route import router_models, router_dataset
+from Backend.app.api.v1.api_route import router_dataset, router_models
 
 LOG_FOLDER = "logs"
 

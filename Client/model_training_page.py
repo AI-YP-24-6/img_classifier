@@ -87,7 +87,6 @@ def get_models_list(url_server):
             return model_info_list
     except Exception as e:
         logger.error("Ошибка получения списка моделей")
-        
 
 
 def model_training_page(url_server):

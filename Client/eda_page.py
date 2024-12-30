@@ -1,4 +1,3 @@
-import streamlit as st
 import json
 from io import BytesIO
 
@@ -7,9 +6,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import requests
-
-from PIL import Image
+import streamlit as st
 from loguru import logger
+from PIL import Image
 
 from Backend.app.api.models import DatasetInfo
 
@@ -37,7 +36,6 @@ def show_images(url_server):
     except Exception as e:
         logger.error("Ошибка получение изображений с датасета")
         st.error(f"Ошибка получение изображений с датасета {e}")
-
 
 
 def show_bar_std_mean_rgb(rgb_df, cls):
