@@ -14,7 +14,7 @@ from Backend.app.api.models import DatasetInfo
 
 
 def show_bar(classes, counts):
-    """Функция для построения стобчатых диаграмм."""
+    """Функция для построения столбчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
     y_pos = np.arange(len(classes))
@@ -79,7 +79,7 @@ def show_bar_std_mean_rgb(rgb_df, cls):
 
 
 def show_eda(url_server):
-    """Функция для отображение основных статистик датасета."""
+    """Функция для отображения основных статистик датасета."""
     try:
         response = requests.get(url_server + "dataset/info")
         response_data = json.loads(response.text)

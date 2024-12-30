@@ -8,7 +8,7 @@ from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityR
 
 
 def make_prediction(url_server, files, use_probability):
-    """Функция для получения предсказания на обученной моделе."""
+    """Функция для получения предсказания на обученной модели."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
         response = requests.post(f"{url_server}{endpoint}", files=files)
@@ -52,7 +52,7 @@ def download_trained_model(url_server, selected_model_info):
 
 
 def model_inference(url_server):
-    """Функция для получения предсказания на обученной моделе."""
+    """Функция для получения предсказания на обученной модели."""
     st.header("Инференс с использованием обученной модели")
 
     if "model_info_list" in st.session_state:
