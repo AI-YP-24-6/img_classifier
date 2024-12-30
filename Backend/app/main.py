@@ -1,6 +1,5 @@
 import os
 import sys
-from dataclasses import dataclass
 from http import HTTPStatus
 
 import uvicorn
@@ -9,7 +8,7 @@ from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
 from Backend.app.api.models import ModelType
-from Backend.app.api.v1.api_route import router_dataset, router_models, models
+from Backend.app.api.v1.api_route import models, router_dataset, router_models
 
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
@@ -61,11 +60,11 @@ app = FastAPI(
 
 @app.on_event("startup")
 def load_baseline_model():
-    '''
+    """
     Загрузка baseline-модели при старте сервера
-    '''
+    """
     baseline_model = load_model()
-    models['baseline'] = {
+    models["baseline"] = {
         "id": "baseline",
         "type": ModelType.baseline,
         "hyperparameters": {"pca__n_components": 0.6},
@@ -76,9 +75,10 @@ def load_baseline_model():
 
 
 class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
-    '''
+    """
     Статус работы сервиса
-    '''
+    """
+
     status: str
 
     model_config = ConfigDict(json_schema_extra={"examples": [{"status": "App healthy"}]})
