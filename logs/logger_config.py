@@ -1,8 +1,10 @@
 import os
 import sys
+
 from loguru import logger
 
-LOG_FOLDER = 'logs'
+LOG_FOLDER = "logs"
+
 
 class InterceptHandler:  # pylint: disable=too-few-public-methods
     def write(self, message):
@@ -11,6 +13,7 @@ class InterceptHandler:  # pylint: disable=too-few-public-methods
         """
         if message.strip():
             logger.info(message.strip())
+
 
 def setup_logger(log_file=None):
     """
@@ -39,8 +42,11 @@ def setup_logger(log_file=None):
 
 
 def configure_client_logging():
+    """Создание логера для клиента"""
     setup_logger(os.path.join(LOG_FOLDER, "client.log"))
 
+
 def configure_server_logging():
+    """Создание логера для сервера"""
     setup_logger(os.path.join(LOG_FOLDER, "server.log"))
     sys.stderr = InterceptHandler()
