@@ -42,11 +42,11 @@ def setup_logger(log_file=None):
 
 
 def configure_client_logging():
-    """Создание логера для клиента"""
+    """Создание логгера для клиента"""
     setup_logger(os.path.join(LOG_FOLDER, "client.log"))
 
 
 def configure_server_logging():
-    """Создание логера для сервера"""
+    """Создание логгера для сервера"""
     setup_logger(os.path.join(LOG_FOLDER, "server.log"))
     sys.stderr = InterceptHandler()

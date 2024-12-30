@@ -11,7 +11,7 @@ from Backend.app.api.v1.api_route import models, router_dataset, router_models
 
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
-from logs.logger_config import configure_server_logging
+from Tools.logger_config import configure_server_logging
 
 configure_server_logging()
 
