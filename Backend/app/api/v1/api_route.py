@@ -34,7 +34,7 @@ from Backend.app.services.preprocessing import (
 from Backend.app.services.preview import preview_dataset, remove_preview
 
 models: dict[str, Any] = {}
-active_model = {"model": None, "info": None}
+active_model: dict[str, Pipeline | None] = {"model": None, "info": None}
 dataset_info = DatasetInfo(
     is_empty=True,
     classes={},
@@ -54,10 +54,10 @@ router_dataset = APIRouter(prefix="/api/v1/dataset")
     status_code=HTTPStatus.CREATED,
     description="Загрузка датасета",
 )
-async def load_dataset(file: Annotated[UploadFile, File(..., description="Арихв с классами изображений")]):
+async def load_dataset(file: Annotated[UploadFile, File(..., description="Архив с классами изображений")]):
     """
     Загрузка датасета.
-    На вход должен подаваться архив, содержащий папки с изображениями классов
+    На вход должен подаваться архив, содержащий папки с изображениями классов.
     """
     if file.filename.lower().endswith(".zip") is False:
         logger.exception("Неверный формат файла. Должен загружаться zip-архив!")
@@ -66,7 +66,7 @@ async def load_dataset(file: Annotated[UploadFile, File(..., description="Ари
         )
     try:
         archive = await file.read()
-        # разархивировал каринки
+        # разархивировал картинки
         preprocess_archive(archive)
         # удалил прошлое превью, если было
         remove_preview()
@@ -91,8 +91,8 @@ async def load_dataset(file: Annotated[UploadFile, File(..., description="Ари
 )
 async def get_dataset_info():
     """
-    Получение информации о датасете
-    Возвращается количество изображений в каждом класса, дубли, таблица размеров и цветов
+    Получение информации о датасете.
+    Возвращается количество изображений в каждом классе, дубли, таблица размеров и цветов
     """
     dataset_uploaded = check_dataset_uploaded()
     if dataset_uploaded is False:
@@ -138,7 +138,7 @@ async def dataset_samples():
 )
 async def fit(request: Annotated[FitRequest, "Параметры для обучения модели"]):
     """
-    Обучение модели. По истечении 10 сеукнд обучение прерывается.
+    Обучение модели. По истечении 10 секунд обучение прерывается.
     Есть возможность дополнительно получить кривую обучения, указав `with_learning_curve=True`
     Также для обучения модели передаются гиперпараметры вида `pca__` и `svc__`
     """
@@ -237,7 +237,7 @@ async def predict_proba(file: Annotated[UploadFile, File(..., description="Фа�
     "/load_baseline",
     response_model=Annotated[ModelInfo, "Информация о baseline-модели"],
     status_code=HTTPStatus.OK,
-    description="Загрузка baiseline-модели",
+    description="Загрузка baseline-модели",
 )
 async def load_baseline():
     """
@@ -333,14 +333,14 @@ async def list_models():
     Возврат списка всех доступных моделей
     """
     return {
-        id: ModelInfo(
-            id=id,
+        model_id: ModelInfo(
+            id=model_id,
             type=model["type"],
             hyperparameters=model["hyperparameters"],
             learning_curve=model["learning_curve"],
             name=model["name"],
         )
-        for id, model in models.items()
+        for model_id, model in models.items()
     }
 
 
@@ -380,25 +380,25 @@ async def model_info(model_id: Annotated[str, "Id модели"]):
     "/remove/{model_id}",
     response_model=Annotated[dict[str, ModelInfo], "Оставшиеся модели"],
     status_code=HTTPStatus.OK,
-    description="Удалиние модели",
+    description="Удаление модели",
 )
 async def remove(model_id: Annotated[str, "Id модели, которую нужно удалить"]):
     """
-    Удалит модель из памяти, ее больше нельзя будет загрузить для работы
+    Удалит модель из памяти, ее больше нельзя будет загрузить для работы.
     """
     if model_id not in models:
         logger.exception(f"Нет модели с id '{model_id}'")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
     del models[model_id]
     return {
-        id: ModelInfo(
-            id=id,
+        model_id: ModelInfo(
+            id=model_id,
             type=model["type"],
             hyperparameters=model["hyperparameters"],
             learning_curve=model["learning_curve"],
             name=model["name"],
         )
-        for id, model in models.items()
+        for model_id, model in models.items()
     }
 
 
