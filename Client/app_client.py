@@ -38,7 +38,7 @@ def configure_logging():
 
 
 if "url_server" not in st.session_state:
-    st.session_state.url_server = "http://127.0.0.1:8081/api/v1"
+    st.session_state.url_server = "http://127.0.0.1:54545/api/v1/"
 logger.info("Запуск клиента")
 st.title("Сервис обучения моделей для классификации фруктов и овощей")
 

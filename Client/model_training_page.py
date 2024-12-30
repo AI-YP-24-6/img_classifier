@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import streamlit as st
+from loguru import logger
 
 from Backend.app.api.models import FitRequest, ModelInfo
 

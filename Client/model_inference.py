@@ -2,6 +2,7 @@ import json
 
 import requests
 import streamlit as st
+from loguru import logger
 
 from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
 
@@ -15,8 +16,8 @@ def make_prediction(url_server, files, use_probability):
         return response_data
     else:
         print(f"Ошибка: {response.status_code} - {response.text}")
-        return None
-
+        logger.exception("Ошибка на сервере во время предсказания")
+        raise Exception(status_code=response.status_code)
 
 def model_inference(url_server):
     st.header("Инференс с использованием обученной модели")
@@ -26,15 +27,23 @@ def model_inference(url_server):
         selected_model_name = st.selectbox("Выберите модель", model_names)
         selected_model_info = next((model for model in model_info_list if model.name == selected_model_name), None)
         with st.spinner("Загрузка модели для предсказания..."):
+            logger.info(f"Началась загрузка модели {selected_model_name} для предсказания")
             load_model = LoadRequest(id=selected_model_info.id)
             load_json = load_model.model_dump()
             response = requests.post(url_server + "models/load", json=load_json)
-            st.success(f"Модель {selected_model_name} успешно подготовлена для предсказания")
+            if response.status_code == 200:
+                st.success(f"Модель {selected_model_name} успешно подготовлена для предсказания")
+                logger.info(f"Модель {selected_model_name} успешно подготовлена для предсказания")
+            else:
+                logger.error(f"Ошибка получения ответа от сервера {response.status_code}")
+            
     else:
         st.warning("Нет обученных моделей")
+        logger.info("Нет обученных моделей")
 
     uploaded_image = st.file_uploader("Загрузите изображение", type=["jpeg", "png", "jpg"])
     if uploaded_image is not None:
+        logger.info("Изображение для предсказания успешно загружено")
         st.image(uploaded_image, caption="Загруженное изображение", use_container_width=True)
 
         files = {"file": (uploaded_image.name, uploaded_image.getvalue(), uploaded_image.type)}
@@ -47,6 +56,9 @@ def model_inference(url_server):
                     f""":green-background[**Я думаю это {prediction_info.prediction}
                             с вероятностью {round(prediction_info.probability,2)*100} %**]"""
                 )
+                logger.info("Предсказание с вероятность выполнено успешно")
             else:
                 prediction_info = PredictionResponse(**response_data)
                 st.markdown(f":green-background[**Я думаю это {prediction_info.prediction}**]")
+                logger.info("Предсказание без вероятности выполнено успешно")
+            
