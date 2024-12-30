@@ -8,9 +8,11 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-from Backend.app.api.v1.api_route import router_dataset, router_models
+from Backend.app.api.models import ModelType
+from Backend.app.api.v1.api_route import router_dataset, router_models, models
 
 # Импорт нужен для работы baseline
+from Backend.app.services.model_loader import load_model
 from Backend.app.services.pipeline import HogTransformer  # pylint: disable=unused-import # noqa: F401
 
 LOG_FOLDER = "logs"
@@ -57,8 +59,26 @@ app = FastAPI(
 )
 
 
-@dataclass
-class StatusResponse(BaseModel):
+@app.on_event("startup")
+def load_baseline_model():
+    '''
+    Загрузка baseline-модели при старте сервера
+    '''
+    baseline_model = load_model()
+    models['baseline'] = {
+        "id": "baseline",
+        "type": ModelType.baseline,
+        "hyperparameters": {"pca__n_components": 0.6},
+        "model": baseline_model,
+        "name": "Baseline",
+        "learning_curve": None,
+    }
+
+
+class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
+    '''
+    Статус работы сервиса
+    '''
     status: str
 
     model_config = ConfigDict(json_schema_extra={"examples": [{"status": "App healthy"}]})
