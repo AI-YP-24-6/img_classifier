@@ -26,7 +26,7 @@ async def lifespan(_: FastAPI):
     models["baseline"] = {
         "id": "baseline",
         "type": ModelType.baseline,
-        "hyperparameters": {"pca__n_components": 0.6},
+        "hyperparameters": {"pca__n_components": 0.6, "svc_probability": True},
         "model": baseline_model,
         "name": "Baseline",
         "learning_curve": None,

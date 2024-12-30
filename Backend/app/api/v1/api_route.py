@@ -22,7 +22,6 @@ from Backend.app.api.models import (
     TableModel,
 )
 from Backend.app.services.analysis import check_dataset_uploaded, classes_info, colors_info, duplicates_info, sizes_info
-from Backend.app.services.model_loader import load_model
 from Backend.app.services.model_trainer import train_model
 from Backend.app.services.pipeline import create_model
 from Backend.app.services.preprocessing import (
@@ -34,7 +33,7 @@ from Backend.app.services.preprocessing import (
 from Backend.app.services.preview import preview_dataset, remove_preview
 
 models: dict[str, Any] = {}
-active_model: dict[str, Pipeline | None] = {"model": None, "info": None}
+active_model: dict[str, Any] = {"model": None, "info": None}
 dataset_info = DatasetInfo(
     is_empty=True,
     classes={},
@@ -92,7 +91,7 @@ async def load_dataset(file: Annotated[UploadFile, File(..., description="Арх
 async def get_dataset_info():
     """
     Получение информации о датасете.
-    Возвращается количество изображений в каждом классе, дубли, таблица размеров и цветов
+    Возвращается количество изображений в каждом классе, дубли, таблица размеров и цветов.
     """
     dataset_uploaded = check_dataset_uploaded()
     if dataset_uploaded is False:
@@ -234,50 +233,6 @@ async def predict_proba(file: Annotated[UploadFile, File(..., description="Фа�
 
 
 @router_models.post(
-    "/load_baseline",
-    response_model=Annotated[ModelInfo, "Информация о baseline-модели"],
-    status_code=HTTPStatus.OK,
-    description="Загрузка baseline-модели",
-)
-async def load_baseline():
-    """
-    Загрузка baseline-модели для работы с ней
-    В первый раз загружается из picke-файла, затем - из памяти
-    """
-    if "baseline" in models:
-        info = ModelInfo(
-            id="baseline",
-            hyperparameters=models["baseline"]["hyperparameters"],
-            type=ModelType.baseline,
-            name="Baseline",
-            learning_curve=None,
-        )
-        active_model["model"] = models["baseline"]["model"]
-        active_model["info"] = info
-        return info
-    baseline = load_model()
-    baseline_info = {
-        "id": "baseline",
-        "type": ModelType.baseline,
-        "hyperparameters": {"pca__n_components": 0.6},
-        "model": baseline,
-        "name": "Baseline",
-        "learning_curve": None,
-    }
-    models["baseline"] = baseline_info
-    info = ModelInfo(
-        id="baseline",
-        hyperparameters=baseline_info["hyperparameters"],
-        type=ModelType.baseline,
-        name="Baseline",
-        learning_curve=None,
-    )
-    active_model["model"] = baseline
-    active_model["info"] = info
-    return info
-
-
-@router_models.post(
     "/load",
     response_model=Annotated[ModelInfo, "Информация о выбранной модели"],
     status_code=HTTPStatus.OK,
@@ -389,6 +344,9 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
     if model_id not in models:
         logger.exception(f"Нет модели с id '{model_id}'")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Нет модели с id '{model_id}'")
+    if model_id == "baseline":
+        logger.exception("Нельзя удалить baseline модель!")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нельзя удалить baseline модель!")
     del models[model_id]
     return {
         model_id: ModelInfo(
@@ -404,13 +362,24 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
 
 @router_models.delete(
     "/remove_all",
-    response_model=Annotated[ApiResponse, "Сообщение об успешном удалении"],
+    response_model=Annotated[dict[str, ModelInfo], "Baseline модели"],
     status_code=HTTPStatus.OK,
-    description="Удаление всех моделей",
+    description="Удаление пользовательских моделей",
 )
 async def remove_all():
     """
-    Полностью удалит все модели, очистка списка моделей
+    Удалит все пользовательские модели, бейзлайн модель не удаляется
     """
-    models.clear()
-    return ApiResponse(message="Все модели удалены")
+    for model_id, model_item in models.items():
+        if model_item["type"] != ModelType.baseline:
+            del models[model_id]
+    return {
+        id: ModelInfo(
+            id=id,
+            type=model["type"],
+            hyperparameters=model["hyperparameters"],
+            learning_curve=model["learning_curve"],
+            name=model["name"],
+        )
+        for id, model in models.items()
+    }
