@@ -25,19 +25,18 @@ jobs:
 
       - name: Run hadolint
         run: |
-           cat .\*.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt || true
+           cat *.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt || true
         continue-on-error: true
 
       - name: Limit report to 100 lines
         if: ${{ github.event_name == 'pull_request'}}
         run: |
-            if [[ $(wc -l < lint-report.txt) ]]; then
-                tail -n 100 lint-report.txt > lint-limited-report.txt
-                echo true >> $GLOBAL_FAILED
+            if [[ $(wc -l < lint-report.txt) != 0 ]]; then
+                tail -n 100 lint-report.txt > lint-limited-report.txt;
+                echo true >> $GLOBAL_FAILED;
             else
-                echo "No docker📦 errors found 🎉✨"
-                echo "No docker📦 errors found 🎉✨" > lint-limited-report.txt
-                echo false >> $GLOBAL_FAILED
+                echo "No docker📦 errors found 🎉✨" > lint-limited-report.txt;
+                echo false >> $GLOBAL_FAILED;
             fi
 
 
