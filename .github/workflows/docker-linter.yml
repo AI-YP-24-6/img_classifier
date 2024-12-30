@@ -1,0 +1,60 @@
+name: docker linter
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: "docker-linter"
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+        pull-requests: write
+    env:
+        GLOBAL_FAILED: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run hadolint
+        run: |
+           cat .\*.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt || true
+        continue-on-error: true
+
+      - name: Limit report to 100 lines
+        if: ${{ -s lint-report.txt  && github.event_name == 'pull_request'}}
+        run: |
+            if [[ $(wc -l < lint-report.txt) ]]; then
+                tail -n 100 lint-report.txt > lint-limited-report.txt
+                echo true >> $GLOBAL_FAILED
+            else
+                echo "No docker📦 errors found 🎉✨" > lint-limited-report.txt
+            fi
+
+
+      - name: Upload lint report
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-limited-report.txt
+
+      - name: Post lint results as PR comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: Dockerfile errors
+          path: lint-limited-report.txt
+          hide: true
+          skip_unchanged: true
+
+      - name: Fail build
+        if: ${{ GLOBAL_FAILED == true }}
+        run: exit 1
