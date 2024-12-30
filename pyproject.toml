@@ -3,7 +3,7 @@ name = "img-classifier"
 version = "0.1.0"
 description = ""
 package-mode = false
-authors = ["Ilya Mevshiy <ilyamevshiy@gmail.com>"]
+authors = ["Ilya Mevshiy <ilyamevshiy@gmail.com>", "Pisarenko Sergei <haggardspark@gmail.com>"]
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/AI-YP-24-6/img_classifier"
@@ -23,7 +23,7 @@ mkdocs-material = "~9.5.49"
 mkdocstrings = { extras = ["python"], version = "^0.27.0" }
 griffe-typingdoc = "^0.2.7"
 mkdocs-jupyter = "^0.25.1"
-scikit-image = "~0.24.0"
+scikit-image = "0.25.0"
 matplotlib = "~3.9.2"
 seaborn = "^0.13.2"
 gdown = "^5.2.0"
@@ -32,7 +32,18 @@ plotly = "^5.24.1"
 notebook = "^7.2.2"
 pycodestyle = "^2.12.1"
 pylint = "^3.3.2"
+uvicorn = "^0.34.0"
+fastapi = "^0.115.6"
+scikit-learn = "^1.6.0"
+opencv-python = "^4.10.0.84"
+python-multipart = "^0.0.20"
+loguru = "^0.7.3"
+streamlit-project-template = "^0.1.2"
+streamlit-option-menu = "^0.4.0"
 
+
+[tool.poetry.group.client.dependencies]
+streamlit = "^1.41.1"
 
 [build-system]
 requires = ["poetry-core"]
