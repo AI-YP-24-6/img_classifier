@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from http import HTTPStatus
 
 import uvicorn

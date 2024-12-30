@@ -11,6 +11,7 @@ from Backend.app.api.models import FitRequest, ModelInfo
 
 def plt_learning_curve(train_sizes, train_scores, test_scores):
     """Функция для отображение графика кривых обучения модели."""
+
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
 
@@ -44,6 +45,7 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
 
 def show_model_statistics(model_info):
     """Функция для отображение информации об обученной модели."""
+
     st.subheader("Информация о модели")
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
@@ -167,6 +169,7 @@ def show_forms_create_model(url_server):
     if st.button(":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
             logger.info(f"Обучение новой модели {name_model}")
+
             try:
                 response = requests.post(url_server + "models/fit", json=fit_json, timeout=90)
                 response_data = json.loads(response.text)
@@ -186,9 +189,10 @@ def show_forms_create_model(url_server):
             except json.JSONDecodeError as json_err:
                 st.error("Ошибка при обработке ответа сервера.")
                 logger.error(f"Ошибка декодирования JSON: {json_err}")
+
             except requests.exceptions.Timeout:
-                st.error("Превышено время ожидания ответа сервера.")
-                logger.error("Превышено время ожидания ответа сервера")
+                st.error("Превышено время ожидания ответа от сервера.")
+                logger.error("Превышено время ожидания ответа от сервера")
 
 
 def model_training_page(url_server):
