@@ -13,7 +13,8 @@ from PIL import Image
 from Backend.app.api.models import DatasetInfo
 
 
-def bar(classes, counts):
+def show_bar(classes, counts):
+    """Функция для построения стобчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
     y_pos = np.arange(len(classes))
@@ -25,6 +26,7 @@ def bar(classes, counts):
 
 
 def show_images(url_server):
+    """Функция для отображения примеров изображений с каждого класса."""
     st.subheader("Примеры изображений по классам")
     try:
         with st.spinner("Ожидаем загрузки изображений..."):
@@ -33,12 +35,21 @@ def show_images(url_server):
             st.image(img, caption="Загруженные изображения", use_container_width=True)
             logger.info("Изображения успешно загружены и отображены для клиента")
 
-    except Exception as e:
-        logger.error("Ошибка получение изображений с датасета")
-        st.error(f"Ошибка получение изображений с датасета {e}")
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP ошибка при получении изображений с датасета: {http_err}")
+        st.error("Ошибка получения изображений с датасета: Проверьте сервер.")
+
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Ошибка сети при получении изображений с датасета: {req_err}")
+        st.error("Ошибка получения изображений с датасета: Проверьте соединение.")
+
+    except OSError as io_err:
+        logger.error(f"Ошибка обработки изображения: {io_err}")
+        st.error("Ошибка обработки изображения: Не удалось открыть изображение.")
 
 
 def show_bar_std_mean_rgb(rgb_df, cls):
+    """Функция для отображение графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
     mean_g = np.mean(rows[:, 3])
@@ -51,7 +62,6 @@ def show_bar_std_mean_rgb(rgb_df, cls):
     stds = [std_r, std_g, std_b]
     channels = ["R", "G", "B"]
 
-    # Создание графика
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
@@ -69,6 +79,7 @@ def show_bar_std_mean_rgb(rgb_df, cls):
 
 
 def show_eda(url_server):
+    """Функция для отображение основных статистик датасета."""
     try:
         response = requests.get(url_server + "dataset/info")
         response_data = json.loads(response.text)
@@ -80,16 +91,16 @@ def show_eda(url_server):
             f"ширина: {round(size_df['width'].mean(), 0)}, "
             f"высота: {round(size_df['height'].mean(), 0)}"
         )
-        logger.info(f"Вывод основных статистик для датасета")
+        logger.info("Вывод основных статистик для датасета")
 
         st.subheader("График распределения изображений по классам:")
-        bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
-        logger.info(f"Отображение графика распределения изображений по классам")
+        show_bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
+        logger.info("Отображение графика распределения изображений по классам")
 
         if dataset_info.duplicates is not None:
             st.subheader("График распределения дубликатов по классам:")
-            bar(dataset_info.duplicates.keys(), dataset_info.duplicates.values())
-            logger.info(f"Отображение графика распределения дубликатов по классам")
+            show_bar(dataset_info.duplicates.keys(), dataset_info.duplicates.values())
+            logger.info("Отображение графика распределения дубликатов по классам")
         else:
             st.write("**Дубликатов нет**")
 
@@ -99,12 +110,21 @@ def show_eda(url_server):
         cls = st.selectbox("Выберите класс", classes)
         show_bar_std_mean_rgb(rgb_df, cls)
 
-    except Exception as e:
-        logger.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
-        st.error(f"Ошибка получение EDA данных, загрузите датасет на сервер")
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP ошибка при получении EDA данных: {http_err}")
+        st.error("Ошибка получения EDA данных: Проверьте сервер.")
+
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Ошибка сети при получении EDA данных: {req_err}")
+        st.error("Ошибка получения EDA данных: Проверьте соединение.")
+
+    except json.JSONDecodeError as json_err:
+        logger.error(f"Ошибка декодирования JSON данных: {json_err}")
+        st.error("Ошибка получения EDA данных: Неверный формат данных.")
 
 
 def eda_page(url_server):
+    """Функция для заполнения страницы с EDA."""
     st.header("EDA для датасета изображений")
     st.subheader("Загрузка данных")
     st.info("Пожалуйста, убедитесь, что ваш датасет соответствует следующим требованиям:")

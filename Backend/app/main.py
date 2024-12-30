@@ -1,55 +1,19 @@
-import os
-import sys
 from dataclasses import dataclass
 from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI
-from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
 from Backend.app.api.models import ModelType
-from Backend.app.api.v1.api_route import router_dataset, router_models, models
+from Backend.app.api.v1.api_route import models, router_dataset, router_models
 
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
 from Backend.app.services.pipeline import HogTransformer  # pylint: disable=unused-import # noqa: F401
+from logs.logger_config import configure_server_logging
 
-LOG_FOLDER = "logs"
-
-
-def configure_logging():
-    """
-    Конфигурация loguru для правильного записывания логов и работы с uvicorn
-    """
-    logger.remove()
-    os.makedirs(LOG_FOLDER, exist_ok=True)
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level}</level>| {message}",
-    )
-    logger.add(
-        os.path.join(LOG_FOLDER, "backend.log"),
-        colorize=True,
-        format="{time} | {level} | {message}",
-        rotation="10 MB",
-        retention="10 days",
-        compression="zip",
-    )
-
-    class InterceptHandler:  # pylint: disable=too-few-public-methods
-        def write(self, message):
-            """
-            Интеграция loguru с uvicorn
-            """
-            if message.strip():
-                logger.info(message.strip())
-
-    sys.stderr = InterceptHandler()
-
-
-configure_logging()
+configure_server_logging()
 
 
 app = FastAPI(
@@ -61,11 +25,11 @@ app = FastAPI(
 
 @app.on_event("startup")
 def load_baseline_model():
-    '''
+    """
     Загрузка baseline-модели при старте сервера
-    '''
+    """
     baseline_model = load_model()
-    models['baseline'] = {
+    models["baseline"] = {
         "id": "baseline",
         "type": ModelType.baseline,
         "hyperparameters": {"pca__n_components": 0.6},
@@ -76,9 +40,10 @@ def load_baseline_model():
 
 
 class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
-    '''
+    """
     Статус работы сервиса
-    '''
+    """
+
     status: str
 
     model_config = ConfigDict(json_schema_extra={"examples": [{"status": "App healthy"}]})

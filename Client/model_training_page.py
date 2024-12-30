@@ -10,6 +10,7 @@ from Backend.app.api.models import FitRequest, ModelInfo
 
 
 def plt_learning_curve(train_sizes, train_scores, test_scores):
+    """Функция для отображение графика кривых обучения модели."""
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
 
@@ -42,11 +43,12 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
 
 
 def show_model_statistics(model_info):
+    """Функция для отображение информации об обученной модели."""
     st.subheader("Информация о модели")
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
-    f"""
-    **Название модели:** {model_info.name}  
+        f"""
+    **Название модели:** {model_info.name}
     **Гиперпараметры:** {hyperparams_str}
     """,
     )
@@ -60,16 +62,23 @@ def show_model_statistics(model_info):
 
 
 def delete_model(url_server, model_id):
+    """Функция для удаления обученной модели."""
     response = requests.delete(url_server + f"models/remove/{model_id}")
-    return True
+    if response.status_code == 200:
+        return True
+    return False
 
 
 def delete_all_models(url_server):
+    """Функция для удаления всех обученных моделей."""
     response = requests.delete(url_server + "models/remove_all")
-    return True
+    if response.status_code == 200:
+        return True
+    return False
 
 
 def get_models_list(url_server):
+    """Функция для получения списка всех обученных моделей."""
     try:
         with st.spinner("Загрузка списка моделей..."):
             logger.info("Загрузка списка моделей с сервера")
@@ -86,11 +95,25 @@ def get_models_list(url_server):
                 st.session_state.model_info_list = model_info_list
                 logger.info(f"Получен список обученных моделей {model_info_list}")
             return model_info_list
-    except Exception as e:
-        logger.error("Ошибка получения списка моделей")
+
+    except requests.exceptions.HTTPError as http_err:
+        logger.error(f"HTTP ошибка при получении списка моделей: {http_err}")
+        st.error("Ошибка получения списка моделей: Проверьте сервер.")
+        return None
+
+    except requests.exceptions.RequestException as req_err:
+        logger.error(f"Ошибка сети при получении списка моделей: {req_err}")
+        st.error("Ошибка получения списка моделей: Проверьте соединение.")
+        return None
+
+    except json.JSONDecodeError as json_err:
+        logger.error(f"Ошибка декодирования JSON: {json_err}")
+        st.error("Ошибка при обработке данных сервера: Неверный формат ответа.")
+        return None
 
 
-def model_training_page(url_server):
+def show_models_list(url_server):
+    """Функция для отображения на странице списка обученных моделей с возможностью их выбора и удаления."""
     st.subheader("Выбор существующих моделей")
     if "selected_model_name" not in st.session_state:
         st.session_state.selected_model_name = ""
@@ -120,9 +143,12 @@ def model_training_page(url_server):
 
         if st.button("Удалить все модели"):
             delete_all_models(url_server)
-            logger.info(f"Все обученные модели успешно удалены")
+            logger.info("Все обученные модели успешно удалены")
             st.rerun()
 
+
+def show_forms_create_model(url_server):
+    """Функция для отображения на странице формы подготовки модели для обучения."""
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
 
     name_model = st.text_input("Введите название модели")
@@ -138,21 +164,31 @@ def model_training_page(url_server):
     )
 
     fit_json = fit_request_data.model_dump()
-    if st.button(f":red[**Начать обучение модели**]"):
+    if st.button(":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
             logger.info(f"Обучение новой модели {name_model}")
             response = requests.post(url_server + "models/fit", json=fit_json)
+            try:
+                response_data = json.loads(response.text)
+                model_info = ModelInfo(**response_data)
+                st.session_state.selected_model_name = model_info.name
+                st.rerun()
+                logger.info(f"Модель {name_model} успешно обучена")
 
-            if response.status_code == 201:
-                try:
-                    response_data = json.loads(response.text)
-                    model_info = ModelInfo(**response_data)
-                    st.session_state.selected_model_name = model_info.name
-                    st.rerun()
-                    logger.info(f"Модель {name_model} успешно обучена")
-                except Exception as e:
-                    st.error(f"Ошибка при парсинге ответа: {e}")
-                    logger.error(f"Ошибка при парсинге ответа: {e}")
-            else:
-                st.error(f"Произошла ошибка: {response.text}")
-                logger.error(f"Произошла ошибка: {response.text}")
+            except requests.exceptions.HTTPError as http_err:
+                st.error("Ошибка сервера при обучении модели.")
+                logger.error(f"HTTP ошибка: {http_err}")
+
+            except requests.exceptions.RequestException as req_err:
+                st.error("Ошибка сети при обучении модели.")
+                logger.error(f"Ошибка сети: {req_err}")
+
+            except json.JSONDecodeError as json_err:
+                st.error("Ошибка при обработке ответа сервера.")
+                logger.error(f"Ошибка декодирования JSON: {json_err}")
+
+
+def model_training_page(url_server):
+    """Функция для заполнения страницы с подготовкой модели для обучения."""
+    show_models_list(url_server)
+    show_forms_create_model(url_server)

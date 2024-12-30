@@ -1,42 +1,13 @@
 import streamlit as st
-
-import os
-import sys
-
 from eda_page import eda_page
 from loguru import logger
 from model_inference import model_inference
 from model_training_page import model_training_page
 from streamlit_option_menu import option_menu
 
-LOG_FOLDER = "logs"
+from logs.logger_config import configure_client_logging
 
-
-def configure_logging():
-    logger.remove()
-    os.makedirs(LOG_FOLDER, exist_ok=True)
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>|<level>{level}</level>| {message}",
-    )
-    logger.add(
-        os.path.join(LOG_FOLDER, "client.log"),
-        colorize=True,
-        format="{time} | {level} | {message}",
-        rotation="10 MB",
-        retention="10 days",
-        compression="zip",
-    )
-
-    class InterceptHandler:
-        def write(self, message):
-            if message.strip():
-                logger.info(message.strip())
-
-    sys.stderr = InterceptHandler()
-    
-configure_logging()
+configure_client_logging()
 
 
 if "url_server" not in st.session_state:
