@@ -167,8 +167,8 @@ def show_forms_create_model(url_server):
     if st.button(":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
             logger.info(f"Обучение новой модели {name_model}")
-            response = requests.post(url_server + "models/fit", json=fit_json)
             try:
+                response = requests.post(url_server + "models/fit", json=fit_json, timeout=90)
                 response_data = json.loads(response.text)
                 model_info = ModelInfo(**response_data)
                 st.session_state.selected_model_name = model_info.name
@@ -186,6 +186,9 @@ def show_forms_create_model(url_server):
             except json.JSONDecodeError as json_err:
                 st.error("Ошибка при обработке ответа сервера.")
                 logger.error(f"Ошибка декодирования JSON: {json_err}")
+            except requests.exceptions.Timeout:
+                st.error("Превышено время ожидания ответа сервера.")
+                logger.error("Превышено время ожидания ответа сервера")
 
 
 def model_training_page(url_server):
