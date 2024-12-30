@@ -5,13 +5,18 @@ import zipfile
 
 import cv2
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image
+
+from Backend.app.services.pipeline import resize_image
 
 TEMP_DIR = "data/temp"
 DATASET_DIR = "data/raw"
 
 
 def preprocess_image(file: bytes):
+    """
+    Обработка изображения для подачи на предсказание
+    """
     try:
         image = Image.open(io.BytesIO(file))
         print(f"File format: {image.format}")
@@ -19,10 +24,13 @@ def preprocess_image(file: bytes):
             raise ValueError("Файл не является поддерживаемым растровым изображением.")
         return np.array(image)
     except Exception as e:
-        raise ValueError(f"Ошибка обработки файла: {e}")
+        raise ValueError(f"Ошибка обработки файла: {e}") from e
 
 
 def preprocess_archive(file: bytes):
+    """
+    Загрузка датасета на хранение
+    """
     if os.path.exists(DATASET_DIR):
         shutil.rmtree(DATASET_DIR)
     # Если был обработанный датасет, то тоже удалить его, т.к. будет новый
@@ -32,35 +40,20 @@ def preprocess_archive(file: bytes):
         with zipfile.ZipFile(io.BytesIO(file), "r") as zip_ref:
             zip_ref.extractall(DATASET_DIR)
     except Exception as e:
-        raise ValueError(f"Ошибка разархивирования: {e}")
-
-
-def set_image_size(img_path: str, save_path: str, size: tuple[int, int]):
-    img = Image.open(img_path)
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-    ratio = img.width / img.height
-    # Широкое изображение
-    if ratio > 1:
-        new_width = size[0]
-        new_height = int(size[0] / ratio)
-    # Высокое изображение
-    else:
-        new_height = size[1]
-        new_width = int(size[1] * ratio)
-    img_resized = img.resize((new_width, new_height), Image.LANCZOS)
-    img_padded = ImageOps.pad(img_resized, size, color="white", centering=(0.5, 0.5))
-    img_padded.save(save_path)
+        raise ValueError(f"Ошибка разархивирования: {e}") from e
 
 
 def preprocess_dataset(size: tuple[int, int]):
-    if os.path.exists(TEMP_DIR) == False:
+    """
+    Обработка датасета с приведением изображений к единому размеру
+    """
+    if os.path.exists(TEMP_DIR) is False:
         os.mkdir(TEMP_DIR)
     if len(os.listdir(TEMP_DIR)) == 0:
         classes = os.listdir(DATASET_DIR)
         for cl in classes:
             temp_cl_path = os.path.join(TEMP_DIR, cl)
-            if os.path.exists(temp_cl_path) == False:
+            if os.path.exists(temp_cl_path) is False:
                 os.mkdir(temp_cl_path)
             folder_path = os.path.join(DATASET_DIR, cl)
             image_names = os.listdir(folder_path)
@@ -68,10 +61,15 @@ def preprocess_dataset(size: tuple[int, int]):
                 img_path = os.path.join(DATASET_DIR, cl, img_name)
                 save_path = os.path.join(TEMP_DIR, cl, img_name)
                 # датасет будет грузиться 1 раз для обучения, ради экономии места перезаписываем старую картинку
-                set_image_size(img_path, save_path, size)
+                img = Image.open(img_path)
+                img_padded = resize_image(img, size)
+                img_padded.save(save_path)
 
 
 def load_colored_images_and_labels():
+    """
+    Преобразование обработанного датасета для подачи в модель
+    """
     images = []
     labels = []
     classes = os.listdir(TEMP_DIR)
