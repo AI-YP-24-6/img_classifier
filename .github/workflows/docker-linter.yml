@@ -28,7 +28,7 @@ jobs:
         continue-on-error: true
 
       - name: Limit report to 100 lines
-        if: ${{ -s lint-report.txt  && github.event_name == 'pull_request'}}
+        if: ${{ github.event_name == 'pull_request'}}
         run: |
             if [[ $(wc -l < lint-report.txt) ]]; then
                 tail -n 100 lint-report.txt > lint-limited-report.txt
