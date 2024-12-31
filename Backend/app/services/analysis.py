@@ -80,6 +80,8 @@ def sizes_info() -> list[list[str | Any]]:
 def check_image_color(folder_path: str, cl: str) -> list[list[str | Any]]:
     """
     Формирование строк с информацией о цветах изображений
+    :param folder_path: путь к папке с классом
+    :param cl: название класса
     """
     colors = []
     for img in os.listdir(folder_path):
