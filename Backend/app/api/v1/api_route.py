@@ -13,7 +13,7 @@ from Backend.app.api.models import (
     ApiResponse,
     DatasetInfo,
     FitRequest,
-    LearningCurvelInfo,
+    LearningCurveInfo,
     LoadRequest,
     ModelInfo,
     ModelType,
@@ -153,7 +153,7 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
             train_sizes, train_scores, test_scores = learning_curve(
                 new_model, images, labels, cv=5, scoring="f1_macro", train_sizes=[0.3, 0.6, 0.9]
             )
-            curve = LearningCurvelInfo(test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
+            curve = LearningCurveInfo(test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
 
         model_id = str(uuid4())
         process = Process(target=train_model, args=(new_model, images, labels, model_id, model_manager))
@@ -374,12 +374,12 @@ async def remove_all():
         if model_item["type"] != ModelType.baseline:
             del models[model_id]
     return {
-        id: ModelInfo(
-            id=id,
+        model_id: ModelInfo(
+            id=model_id,
             type=model["type"],
             hyperparameters=model["hyperparameters"],
             learning_curve=model["learning_curve"],
             name=model["name"],
         )
-        for id, model in models.items()
+        for model_id, model in models.items()
     }

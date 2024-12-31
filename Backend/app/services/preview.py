@@ -12,7 +12,7 @@ PREVIEW_PATH = os.path.join(PREVIEW_DIR, "preview.png")
 
 def plot_images(num_images=5):
     """
-    Создание картинки с примерами изображений в каждом класса с записью его в хранимый файл и отдачей в буфере
+    Создание картинки с примерами изображений в каждом классе с записью его в хранимый файл и отдачей в буфере
     """
     classes = os.listdir(DATASET_DIR)
     _, axs = plt.subplots(len(classes), num_images, figsize=(15, 5 * len(classes)))

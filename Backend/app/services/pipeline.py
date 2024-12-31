@@ -11,20 +11,20 @@ from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.svm import SVC
 
 
-def resize_image(imgage: Image.Image, size: tuple[int, int]) -> Image.Image:
+def resize_image(image: Image.Image, size: tuple[int, int]) -> Image.Image:
     """
     Изменение размера изображения к заданному
     """
-    if imgage.mode != "RGB":
-        imgage = imgage.convert("RGB")
-    ratio = imgage.width / imgage.height
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    ratio = image.width / image.height
     if ratio > 1:
         new_width = size[0]
         new_height = int(size[0] / ratio)
     else:
         new_height = size[1]
         new_width = int(size[1] * ratio)
-    img_resized = imgage.resize((new_width, new_height), Resampling.LANCZOS)
+    img_resized = image.resize((new_width, new_height), Resampling.LANCZOS)
     img_padded = ImageOps.pad(img_resized, size, color="white", centering=(0.5, 0.5))
     return img_padded
 
@@ -85,25 +85,25 @@ class HogTransformer(BaseEstimator, TransformerMixin):
 
     def predict(self, X: list[list[float]]) -> np.array:
         """
-        Повторение метода transfom для прдесказаний на изображениях
+        Повторение метода transform для предсказаний на изображениях
         """
         return self.transform(X)
 
 
-def create_model(hypreparameters: Optional[dict[str, Any]]) -> Pipeline:
+def create_model(hyperparameters: Optional[dict[str, Any]]) -> Pipeline:
     """
     Создание pipline с HOG-признаками, PCA и SVM.
-    С возможностью установить гиперпараметры для PCA и SVC, испльзуя `pca__`, `svc__`
+    С возможностью установить гиперпараметры для PCA и SVC, используя `pca__`, `svc__`
     """
     hog_transformer = HogTransformer(orientations=3, pixels_per_cell=(10, 10), cells_per_block=(2, 2), size=(64, 64))
-    if hypreparameters is not None:
+    if hyperparameters is not None:
         svc_dict = {}
         pca_dict = {}
-        for param in hypreparameters:
+        for param in hyperparameters:
             if param.startswith("svc__"):
-                svc_dict[param[5:]] = hypreparameters[param]
+                svc_dict[param[5:]] = hyperparameters[param]
             if param.startswith("pca__"):
-                pca_dict[param[5:]] = hypreparameters[param]
+                pca_dict[param[5:]] = hyperparameters[param]
         pca = PCA(**pca_dict)
         svc = SVC(**svc_dict)
         return make_pipeline(hog_transformer, pca, svc)

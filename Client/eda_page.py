@@ -49,7 +49,7 @@ def show_images(url_server):
 
 
 def show_bar_std_mean_rgb(rgb_df, cls):
-    """Функция для отображение графика отклонений по каналам RGB для конкретного класса."""
+    """Функция для отображения графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
     mean_g = np.mean(rows[:, 3])
