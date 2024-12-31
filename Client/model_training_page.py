@@ -3,44 +3,88 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
+import seaborn as sns
 import streamlit as st
 from loguru import logger
 
 from Backend.app.api.models import FitRequest, ModelInfo
 
 
-def plt_learning_curve(train_sizes: list[int], train_scores: list[float], test_scores: list[float]):
+def plt_learning_curve(model_info_list: list[ModelInfo]):
     """Функция для отображение графика кривых обучения модели."""
-
-    train_scores_mean = np.mean(train_scores, axis=1)
-    train_scores_std = np.std(train_scores, axis=1)
-
-    test_scores_mean = np.mean(test_scores, axis=1)
-    test_scores_std = np.std(test_scores, axis=1)
-
     plt.figure(figsize=(10, 6))
+    colors = sns.color_palette("husl", len(model_info_list))
 
-    plt.plot(train_sizes, train_scores_mean, marker="o", label="Тренировочная оценка", color="blue")
-    plt.fill_between(
-        train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, color="blue", alpha=0.2
-    )
+    for index, model in enumerate(model_info_list):
 
-    plt.plot(train_sizes, test_scores_mean, marker="o", label="Тестовая оценка", color="green")
-    plt.fill_between(
-        train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, color="green", alpha=0.2
-    )
+        train_scores_mean = np.mean(model.learning_curve.train_scores, axis=1)
+        train_scores_std = np.std(model.learning_curve.train_scores, axis=1)
+
+        test_scores_mean = np.mean(model.learning_curve.test_scores, axis=1)
+        test_scores_std = np.std(model.learning_curve.test_scores, axis=1)
+
+        plt.plot(
+            model.learning_curve.train_sizes,
+            train_scores_mean,
+            marker="o",
+            label=f"{model.name} - Тренировочная оценка",
+            color=colors[index],
+        )
+        plt.fill_between(
+            model.learning_curve.train_sizes,
+            train_scores_mean - train_scores_std,
+            train_scores_mean + train_scores_std,
+            color=colors[index],
+            alpha=0.2,
+        )
+
+        plt.plot(
+            model.learning_curve.train_sizes,
+            test_scores_mean,
+            marker="o",
+            label=f"{model.name} - Тестовая оценка",
+            color=colors[index],
+            linestyle="--",
+        )
+
+        plt.fill_between(
+            model.learning_curve.train_sizes,
+            test_scores_mean - test_scores_std,
+            test_scores_mean + test_scores_std,
+            color=colors[index],
+            alpha=0.2,
+        )
 
     plt.title("Кривые обучения")
     plt.xlabel("Размер обучающей выборки")
     plt.ylabel("f1-macro")
-    plt.xticks(train_sizes)
-    plt.yticks(np.arange(0, 1.1, 0.1))
-    plt.ylim(0, 1)
     plt.legend()
     plt.grid()
     st.pyplot(plt)
     plt.close()
     logger.info("Построен график кривых обучения модели")
+
+
+def change_models_learning_curve():
+    """Функция выбора моделей, для которых будет постоен график кривых обучения."""
+    if "model_info_list" in st.session_state:
+        st.subheader("Построение графиков кривых обучения моделей")
+        model_info_list = st.session_state.model_info_list
+        model_learning_curve = []
+        valid_models = []
+        for model_info in model_info_list:
+            if model_info.learning_curve is not None:
+                valid_models.append(model_info)
+                if st.checkbox(model_info.name, value=False):
+                    model_learning_curve.append(model_info)
+
+        if model_learning_curve:
+            plt_learning_curve(model_learning_curve)
+        elif valid_models:
+            st.warning("Выберите хотя бы одну модель для отображения.")
+    else:
+        st.error("Список моделей не найден в состоянии сессии.")
+        logger.error("Список моделей не найден в состоянии сессии.")
 
 
 def show_model_statistics(model_info: ModelInfo):
@@ -50,17 +94,13 @@ def show_model_statistics(model_info: ModelInfo):
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
         f"""
-    **Название модели:** {model_info.name}
+    **Название модели:** {model_info.name} <br>
     **Гиперпараметры:** {hyperparams_str}
     """,
+        unsafe_allow_html=True,
     )
 
     logger.info("Для клиента отображена основная информация об обученной модели")
-
-    learning_curve = model_info.learning_curve
-    if learning_curve is not None:
-        st.subheader("Полученные кривые обучения")
-        plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
 
 
 def delete_model(url_server: str, model_id: str) -> bool:
@@ -197,4 +237,5 @@ def show_forms_create_model(url_server: str):
 def model_training_page(url_server: str):
     """Функция для заполнения страницы с подготовкой модели для обучения."""
     show_models_list(url_server)
+    change_models_learning_curve()
     show_forms_create_model(url_server)
