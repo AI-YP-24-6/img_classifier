@@ -10,9 +10,9 @@ PREVIEW_DIR = "data/preview"
 PREVIEW_PATH = os.path.join(PREVIEW_DIR, "preview.png")
 
 
-def plot_images(num_images=5):
+def plot_images(num_images: int = 5) -> BytesIO:
     """
-    Создание картинки с примерами изображений в каждом класса с записью его в хранимый файл и отдачей в буфере
+    Создание картинки с примерами изображений в каждом классе с записью его в хранимый файл и отдачей в буфере
     """
     classes = os.listdir(DATASET_DIR)
     _, axs = plt.subplots(len(classes), num_images, figsize=(15, 5 * len(classes)))
@@ -39,7 +39,7 @@ def plot_images(num_images=5):
     return buffer
 
 
-def remove_preview():
+def remove_preview() -> None:
     """
     Удаление картинки с примерами из хранения
     """
@@ -47,7 +47,7 @@ def remove_preview():
         os.remove(PREVIEW_PATH)
 
 
-def preview_dataset(num_images: int):
+def preview_dataset(num_images: int) -> BytesIO:
     """
     Возврат картинки с примерами изображений в каждом классе
     Если картинка была уже сгенерирована, то читается из файла,

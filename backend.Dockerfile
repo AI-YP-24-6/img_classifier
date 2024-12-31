@@ -2,6 +2,7 @@ FROM python:3.12-slim-bookworm
 
 COPY pyproject.toml poetry.lock /workdir/
 COPY Backend/ /workdir/Backend
+COPY Tools/ /workdir/Tools
 
 WORKDIR /workdir
 

@@ -9,7 +9,7 @@ from Backend.app.api.models import LoadRequest, ModelInfo, PredictionResponse, P
 
 
 def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> dict:
-    """Функция для получения предсказания на обученной моделе."""
+    """Функция для получения предсказания на обученной модели."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
         response = requests.post(f"{url_server}{endpoint}", files=files)
@@ -53,7 +53,7 @@ def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> b
 
 
 def model_inference(url_server: str):
-    """Функция для получения предсказания на обученной моделе."""
+    """Функция для получения предсказания на обученной модели."""
     st.header("Инференс с использованием обученной модели")
 
     if "model_info_list" in st.session_state:

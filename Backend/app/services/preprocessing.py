@@ -13,7 +13,7 @@ TEMP_DIR = "data/temp"
 DATASET_DIR = "data/raw"
 
 
-def preprocess_image(file: bytes):
+def preprocess_image(file: bytes) -> np.ndarray:
     """
     Обработка изображения для подачи на предсказание
     """
@@ -27,7 +27,7 @@ def preprocess_image(file: bytes):
         raise ValueError(f"Ошибка обработки файла: {e}") from e
 
 
-def preprocess_archive(file: bytes):
+def preprocess_archive(file: bytes) -> None:
     """
     Загрузка датасета на хранение
     """
@@ -43,7 +43,7 @@ def preprocess_archive(file: bytes):
         raise ValueError(f"Ошибка разархивирования: {e}") from e
 
 
-def preprocess_dataset(size: tuple[int, int]):
+def preprocess_dataset(size: tuple[int, int]) -> None:
     """
     Обработка датасета с приведением изображений к единому размеру
     """
@@ -66,7 +66,7 @@ def preprocess_dataset(size: tuple[int, int]):
                 img_padded.save(save_path)
 
 
-def load_colored_images_and_labels():
+def load_colored_images_and_labels() -> tuple[np.ndarray, np.ndarray]:
     """
     Преобразование обработанного датасета для подачи в модель
     """
