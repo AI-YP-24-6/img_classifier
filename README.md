@@ -124,9 +124,9 @@ ___
     - Описание: Загружает baseline-модель в активное состояние.(В чекпоинте Baseline мы выбрали SVC модель. С ее параметрами можно ознакомиться в baseline.md(/Baseline/baseline.md))
     - Ответ: Информация о baseline-модели (ModelInfo).
     - Код ответа: 200 OK
- 
- ![predict_proba](readme_data/predict_proba.gif)   
- 
+
+ ![predict_proba](readme_data/predict_proba.gif)
+
 - /api/v1/models/unload
   - Метод: POST
   - Описание: Выгружает текущую активную модель из памяти.
@@ -197,9 +197,13 @@ ___
 ```
 git clone https://github.com/AI-YP-24-6/img_classifier.git
 ```
-- Для развертывания сервиса выполните команду:
+FastApi сервер отдельно можно запустить по в файле Backend/app/main.py
+
+Streamlit приложение отдельно можно запускается по в файле Frontend/run.py
+
+- Для развертывания двух докер образов выполните команду:
 ```
-docker-compose up --build
+docker compose up -d
 ```
 Описание docker-compose:
 В данном сервисе поднимаются 2 объединенных докер контейнера с веб-приложением FastApi и веб-приложением Streamlit.
