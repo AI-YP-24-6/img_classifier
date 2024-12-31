@@ -15,7 +15,7 @@ from Backend.app.api.models import DatasetInfo
 
 
 def show_bar(classes: list[str], counts: list[int]):
-    """Функция для построения стобчатых диаграмм."""
+    """Функция для построения столбчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
     y_pos = np.arange(len(classes))
@@ -50,7 +50,7 @@ def show_images(url_server: str):
 
 
 def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
-    """Функция для отображение графика отклонений по каналам RGB для конкретного класса."""
+    """Функция для отображения графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
     mean_g = np.mean(rows[:, 3])
@@ -80,7 +80,7 @@ def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
 
 
 def show_eda(url_server: str):
-    """Функция для отображение основных статистик датасета."""
+    """Функция для отображения основных статистик датасета."""
     try:
         response = requests.get(url_server + "dataset/info")
         response_data = json.loads(response.text)

@@ -4,7 +4,7 @@ from loguru import logger
 from sklearn.pipeline import Pipeline
 
 
-def train_model(model: Pipeline, images: list, labels: list, model_id: str, manager: dict):
+def train_model(model: Pipeline, images: list, labels: list, model_id: str, manager: dict) -> None:
     """
     Обучение модели и ее возврат в Manager
     """

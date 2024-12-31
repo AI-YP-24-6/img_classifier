@@ -5,7 +5,7 @@ from streamlit_option_menu import option_menu
 from Client.eda_page import eda_page
 from Client.model_inference import model_inference
 from Client.model_training_page import model_training_page
-from logs.logger_config import configure_client_logging
+from Tools.logger_config import configure_client_logging
 
 configure_client_logging()
 
