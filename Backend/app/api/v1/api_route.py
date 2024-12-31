@@ -53,7 +53,9 @@ router_dataset = APIRouter(prefix="/api/v1/dataset")
     status_code=HTTPStatus.CREATED,
     description="Загрузка датасета",
 )
-async def load_dataset(file: Annotated[UploadFile, File(..., description="Архив с классами изображений")]):
+async def load_dataset(
+    file: Annotated[UploadFile, File(..., description="Архив с классами изображений")]
+) -> DatasetInfo:
     """
     Загрузка датасета.
     На вход должен подаваться архив, содержащий папки с изображениями классов.
@@ -88,7 +90,7 @@ async def load_dataset(file: Annotated[UploadFile, File(..., description="Арх
     status_code=HTTPStatus.OK,
     description="Получение информации о датасете",
 )
-async def get_dataset_info():
+async def get_dataset_info() -> DatasetInfo:
     """
     Получение информации о датасете.
     Возвращается количество изображений в каждом классе, дубли, таблица размеров и цветов.
@@ -114,7 +116,7 @@ async def get_dataset_info():
     status_code=HTTPStatus.OK,
     description="Изображения из классов",
 )
-async def dataset_samples():
+async def dataset_samples() -> StreamingResponse:
     """
     Возвращает картинку с примерами изображений по каждому классу
     """
@@ -135,7 +137,7 @@ async def dataset_samples():
     status_code=HTTPStatus.CREATED,
     description="Обучение модели",
 )
-async def fit(request: Annotated[FitRequest, "Параметры для обучения модели"]):
+async def fit(request: Annotated[FitRequest, "Параметры для обучения модели"]) -> ModelInfo:
     """
     Обучение модели. По истечении 10 секунд обучение прерывается.
     Есть возможность дополнительно получить кривую обучения, указав `with_learning_curve=True`
@@ -190,7 +192,9 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
     status_code=HTTPStatus.OK,
     description="Предсказание класса",
 )
-async def predict(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
+async def predict(
+    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]
+) -> PredictionResponse:
     """
     Предсказание изображенного фрукта или овоща
     """
@@ -213,7 +217,9 @@ async def predict(file: Annotated[UploadFile, File(..., description="Файл и
     status_code=HTTPStatus.OK,
     description="Предсказание класса с вероятностью",
 )
-async def predict_proba(file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]):
+async def predict_proba(
+    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]
+) -> ProbabilityResponse:
     """
     Предсказание с вероятностью изображенного фрукта или овоща
     """
@@ -238,7 +244,7 @@ async def predict_proba(file: Annotated[UploadFile, File(..., description="Фа�
     status_code=HTTPStatus.OK,
     description="Загрузка одной из моделей",
 )
-async def load(request: LoadRequest):
+async def load(request: LoadRequest) -> ModelInfo:
     """
     Загрузка пользовательской модели для использования. Модель загружается по id
     """
@@ -267,7 +273,7 @@ async def load(request: LoadRequest):
     status_code=HTTPStatus.OK,
     description="Выгрузка модели из памяти",
 )
-async def unload():
+async def unload() -> ApiResponse:
     """
     Выгрузка модели.
     Если модель была выгружена, то предсказания не будут работать пока не загрузят новую модель
@@ -283,7 +289,7 @@ async def unload():
     status_code=HTTPStatus.OK,
     description="Получение списка моделей",
 )
-async def list_models():
+async def list_models() -> dict[str, ModelInfo]:
     """
     Возврат списка всех доступных моделей
     """
@@ -305,7 +311,7 @@ async def list_models():
     status_code=HTTPStatus.OK,
     description="Получение информации о модели",
 )
-async def model_info(model_id: Annotated[str, "Id модели"]):
+async def model_info(model_id: Annotated[str, "Id модели"]) -> ModelInfo:
     """
     Возвращает информацию по модели с указанным id.
     В информацию входит:
@@ -337,7 +343,7 @@ async def model_info(model_id: Annotated[str, "Id модели"]):
     status_code=HTTPStatus.OK,
     description="Удаление модели",
 )
-async def remove(model_id: Annotated[str, "Id модели, которую нужно удалить"]):
+async def remove(model_id: Annotated[str, "Id модели, которую нужно удалить"]) -> dict[str, ModelInfo]:
     """
     Удалит модель из памяти, ее больше нельзя будет загрузить для работы.
     """
@@ -366,7 +372,7 @@ async def remove(model_id: Annotated[str, "Id модели, которую ну�
     status_code=HTTPStatus.OK,
     description="Удаление пользовательских моделей",
 )
-async def remove_all():
+async def remove_all() -> dict[str, ModelInfo]:
     """
     Удалит все пользовательские модели, бейзлайн модель не удаляется
     """

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Self
 
 import cv2
 import numpy as np
@@ -30,7 +30,11 @@ def resize_image(image: Image.Image, size: tuple[int, int]) -> Image.Image:
 
 
 def extract_hog_color_features(
-    images, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), size=(64, 64)
+    images,
+    orientations: int = 9,
+    pixels_per_cell: tuple[int, int] = (8, 8),
+    cells_per_block: tuple[int, int] = (2, 2),
+    size: tuple[int, int] = (64, 64),
 ) -> np.array:
     """
     Изменение размера изображений к заданному и извлечение HOG-признаков из изображений
@@ -56,7 +60,13 @@ def extract_hog_color_features(
 
 
 class HogTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, orientations=3, pixels_per_cell=(10, 10), cells_per_block=(2, 2), size=(64, 64)):
+    def __init__(
+        self,
+        orientations: int = 3,
+        pixels_per_cell: tuple[int, int] = (10, 10),
+        cells_per_block: tuple[int, int] = (2, 2),
+        size: tuple[int, int] = (64, 64),
+    ):
         """
         Инициализация параметров для ресайза изображений и извлечения признаков
         """
@@ -65,7 +75,7 @@ class HogTransformer(BaseEstimator, TransformerMixin):
         self.cells_per_block = cells_per_block
         self.size = size
 
-    def fit(self, *_):
+    def fit(self, *_) -> Self:
         """
         Обучение ничего не делает
         """

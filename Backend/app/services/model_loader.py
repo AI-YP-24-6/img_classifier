@@ -25,7 +25,7 @@ class CustomUnpickler(pickle.Unpickler):
         return super().find_class(module, name)
 
 
-def load_model():
+def load_model() -> HogTransformer | Any:
     """
     Загрузка baseline-модели из pickle-файла
     """
