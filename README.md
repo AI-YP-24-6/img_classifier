@@ -51,7 +51,7 @@ ___
   - Ошибки:
 400 Bad Request: Если загруженный файл не является ZIP-архивом или произошла ошибка при обработке.
 
-![load_dataset.gif](readme_data/load_dataset.gif)
+![load_dataset.gif](Media/load_dataset.gif)
 
 - /api/v1/dataset/info
     - Метод: GET
@@ -68,7 +68,7 @@ ___
   200 OK — успешный запрос.
   400 Bad Request — датасет не загружен.
 
-![dataset_info.gif](readme_data/dataset_info.gif)
+![dataset_info.gif](Media/dataset_info.gif)
 
 - /api/v1/models/fit
     - Метод: POST
@@ -83,7 +83,7 @@ ___
 400 Bad Request — ошибка обучения.
 408 Request Timeout — превышение времени обучения.
 
-![fit.gif](readme_data/fit.gif)
+![fit.gif](Media/fit.gif)
 
 - /api/v1/models/list_models
     - Метод: GET
@@ -109,7 +109,7 @@ ___
   200 OK — успешное предсказание.
   400 Bad Request — ошибка (например, модель не выбрана).
 
-![predict.gif](readme_data/predict.gif)
+![predict.gif](Media/predict.gif)
 
 - /api/v1/models/predict_proba
     - Метод: POST
@@ -125,7 +125,7 @@ ___
     - Ответ: Информация о baseline-модели (ModelInfo).
     - Код ответа: 200 OK
 
- ![predict_proba](readme_data/predict_proba.gif)
+ ![predict_proba](Media/predict_proba.gif)
 
 - /api/v1/models/unload
   - Метод: POST
@@ -145,7 +145,7 @@ ___
   - Ответ: Успешное сообщение (ApiResponse).
   - Код ответа: 200 OK
 
-![unload_remove.gif](readme_data/unload_remove.gif)
+![unload_remove.gif](Media/unload_remove.gif)
 
 
 ### Приложение Streamlit
@@ -189,7 +189,7 @@ ___
 
     Использует серверные API для загрузки модели и выполнения предсказания.
 
-![streamlit.gif](readme_data/streamlit.gif)
+![streamlit.gif](Media/streamlit.gif)
 
 ## Инструкция по запуску
 
