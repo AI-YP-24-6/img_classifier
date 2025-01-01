@@ -201,6 +201,13 @@ FastApi сервер отдельно можно запустить по в фа
 
 Streamlit приложение отдельно можно запускается по в файле Frontend/run.py
 
+Для запуска FastApi и Streamlit одновременно выполните команды в 2 консолях:
+```
+$env:PYTHONPATH="C:<path>\img_classifier"
+streamlit run .\Client\app_client.py --server.port=8081 --server.address=127.0.0.1
+uvicorn Backend.app.main:app --host=0.0.0.0 --port=54545
+```
+
 - Для развертывания двух докер образов выполните команду:
 ```
 docker compose up -d --build
