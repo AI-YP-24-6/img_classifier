@@ -13,6 +13,8 @@ RUN python -m pip install --no-cache-dir poetry==1.8.5 \
     && poetry install --without docs,linters --no-interaction --no-ansi \
     && rm -rf "$(poetry config cache-dir)/\{cache,artifacts\}"
 
+ENV BACKEND_URL="http://img_classifier-backend-1:54545/api/v1/"
+
 ENV PATH="${PATH}:/root/.local/bin"
 ENV PYTHONPATH="/workdir"
 

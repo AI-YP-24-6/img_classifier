@@ -8,12 +8,13 @@ import plotly.graph_objects as go
 import requests
 import streamlit as st
 from loguru import logger
+from pandas import DataFrame
 from PIL import Image
 
 from Backend.app.api.models import DatasetInfo
 
 
-def show_bar(classes, counts):
+def show_bar(classes: list[str], counts: list[int]) -> None:
     """Функция для построения столбчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
@@ -25,12 +26,12 @@ def show_bar(classes, counts):
     plt.close()
 
 
-def show_images(url_server):
+def show_images(url_server: str) -> None:
     """Функция для отображения примеров изображений с каждого класса."""
     st.subheader("Примеры изображений по классам")
     try:
         with st.spinner("Ожидаем загрузки изображений..."):
-            response = requests.get(url_server + "dataset/samples")
+            response = requests.get(url_server + "dataset/samples", timeout=90)
             img = Image.open(BytesIO(response.content))
             st.image(img, caption="Загруженные изображения", use_container_width=True)
             logger.info("Изображения успешно загружены и отображены для клиента")
@@ -38,6 +39,10 @@ def show_images(url_server):
     except requests.exceptions.HTTPError as http_err:
         logger.error(f"HTTP ошибка при получении изображений с датасета: {http_err}")
         st.error("Ошибка получения изображений с датасета: Проверьте сервер.")
+
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
 
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении изображений с датасета: {req_err}")
@@ -48,7 +53,7 @@ def show_images(url_server):
         st.error("Ошибка обработки изображения: Не удалось открыть изображение.")
 
 
-def show_bar_std_mean_rgb(rgb_df, cls):
+def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str) -> None:
     """Функция для отображения графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
@@ -78,10 +83,10 @@ def show_bar_std_mean_rgb(rgb_df, cls):
     logger.info(f"Отображение графика отклонений по каналам RGB для класса {cls}")
 
 
-def show_eda(url_server):
+def show_eda(url_server: str) -> None:
     """Функция для отображения основных статистик датасета."""
     try:
-        response = requests.get(url_server + "dataset/info")
+        response = requests.get(url_server + "dataset/info", timeout=90)
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
         st.subheader("Основные статистики:")
@@ -114,6 +119,10 @@ def show_eda(url_server):
         logger.error(f"HTTP ошибка при получении EDA данных: {http_err}")
         st.error("Ошибка получения EDA данных: Проверьте сервер.")
 
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении EDA данных: {req_err}")
         st.error("Ошибка получения EDA данных: Проверьте соединение.")
@@ -123,7 +132,7 @@ def show_eda(url_server):
         st.error("Ошибка получения EDA данных: Неверный формат данных.")
 
 
-def eda_page(url_server):
+def eda_page(url_server: str) -> None:
     """Функция для заполнения страницы с EDA."""
     st.header("EDA для датасета изображений")
     st.subheader("Загрузка данных")
@@ -138,16 +147,22 @@ def eda_page(url_server):
     if uploaded_file is not None:
         files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
         with st.spinner("Ожидаем загрузки датасета на сервер..."):
-            response = requests.post(url_server + "dataset/load", files=files)
-            if response.status_code == 201:
-                st.session_state.uploaded_file = uploaded_file
-                st.success(f"Новый датасет {uploaded_file.name} успешно загружен на сервер")
-                logger.info("Датасет успешно загружен на сервер")
-                show_eda(url_server)
-                show_images(url_server)
-            else:
-                logger.error(f"Произошла ошибка: {response.text}")
-                st.error(f"Произошла ошибка: {response.text}")
+            try:
+                response = requests.post(url_server + "dataset/load", files=files, timeout=90)
+                if response.status_code == 201:
+                    st.session_state.uploaded_file = uploaded_file
+                    st.success(f"Новый датасет {uploaded_file.name} успешно загружен на сервер")
+                    logger.info("Датасет успешно загружен на сервер")
+                    show_eda(url_server)
+                    show_images(url_server)
+                else:
+                    logger.error(f"Произошла ошибка: {response.text}")
+                    st.error(f"Произошла ошибка: {response.text}")
+
+            except requests.exceptions.Timeout:
+                st.error("Превышено время ожидания ответа от сервера.")
+                logger.error("Превышено время ожидания ответа от сервера")
+
     elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
         logger.info(f"На сервере уже есть датасет {st.session_state.uploaded_file.name}")
         st.subheader(f"**Датасет:** {st.session_state.uploaded_file.name}")

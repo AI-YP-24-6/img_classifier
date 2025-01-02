@@ -97,8 +97,8 @@ class DatasetInfo(BaseModel):
     - загружен датасет или нет
     """
 
-    classes: Annotated[dict[str, int], "Информация о количестве изображений в классах"]
-    duplicates: Annotated[dict[str, int], "Информация о дубликатах в классах"]
+    classes: Annotated[dict[str:int], "Информация о количестве изображений в классах"]
+    duplicates: Annotated[dict[str:int], "Информация о дубликатах в классах"]
     sizes: Annotated[TableModel, "Таблица размеров изображений"]
     colors: Annotated[TableModel, "Таблица цветов по каналам изображений"]
     is_empty: Annotated[bool, "Флаг, что датасет не загружен"]

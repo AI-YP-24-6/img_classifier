@@ -3,38 +3,69 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
+import seaborn as sns
 import streamlit as st
 from loguru import logger
 
 from Backend.app.api.models import FitRequest, ModelInfo
 
 
-def plt_learning_curve(train_sizes, train_scores, test_scores):
+def timeout_handler() -> None:
+    """
+    Функция обработки стандартного таймаута
+    """
+    st.error("Превышено время ожидания ответа от сервера.")
+    logger.error("Превышено время ожидания ответа от сервера")
+
+
+def plt_learning_curve(model_info_list: list[ModelInfo]) -> None:
     """Функция для отображения графика кривых обучения модели."""
-    train_scores_mean = np.mean(train_scores, axis=1)
-    train_scores_std = np.std(train_scores, axis=1)
-
-    test_scores_mean = np.mean(test_scores, axis=1)
-    test_scores_std = np.std(test_scores, axis=1)
-
     plt.figure(figsize=(10, 6))
+    colors = sns.color_palette("husl", len(model_info_list))
 
-    plt.plot(train_sizes, train_scores_mean, marker="o", label="Тренировочная оценка", color="blue")
-    plt.fill_between(
-        train_sizes, train_scores_mean - train_scores_std, train_scores_mean + train_scores_std, color="blue", alpha=0.2
-    )
+    for index, model in enumerate(model_info_list):
 
-    plt.plot(train_sizes, test_scores_mean, marker="o", label="Тестовая оценка", color="green")
-    plt.fill_between(
-        train_sizes, test_scores_mean - test_scores_std, test_scores_mean + test_scores_std, color="green", alpha=0.2
-    )
+        train_scores_mean = np.mean(model.learning_curve.train_scores, axis=1)
+        train_scores_std = np.std(model.learning_curve.train_scores, axis=1)
+
+        test_scores_mean = np.mean(model.learning_curve.test_scores, axis=1)
+        test_scores_std = np.std(model.learning_curve.test_scores, axis=1)
+
+        plt.plot(
+            model.learning_curve.train_sizes,
+            train_scores_mean,
+            marker="o",
+            label=f"{model.name} - Тренировочная оценка",
+            color=colors[index],
+        )
+        plt.fill_between(
+            model.learning_curve.train_sizes,
+            train_scores_mean - train_scores_std,
+            train_scores_mean + train_scores_std,
+            color=colors[index],
+            alpha=0.2,
+        )
+
+        plt.plot(
+            model.learning_curve.train_sizes,
+            test_scores_mean,
+            marker="o",
+            label=f"{model.name} - Тестовая оценка",
+            color=colors[index],
+            linestyle="--",
+        )
+
+        plt.fill_between(
+            model.learning_curve.train_sizes,
+            test_scores_mean - test_scores_std,
+            test_scores_mean + test_scores_std,
+            color=colors[index],
+            alpha=0.2,
+        )
 
     plt.title("Кривые обучения")
     plt.xlabel("Размер обучающей выборки")
     plt.ylabel("f1-macro")
-    plt.xticks(train_sizes)
-    plt.yticks(np.arange(0, 1.1, 0.1))
-    plt.ylim(0, 1)
     plt.legend()
     plt.grid()
     st.pyplot(plt)
@@ -42,48 +73,77 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
     logger.info("Построен график кривых обучения модели")
 
 
-def show_model_statistics(model_info):
+def change_models_learning_curve() -> None:
+    """Функция выбора моделей, для которых будет постоен график кривых обучения."""
+    if "model_info_list" in st.session_state:
+        st.subheader("Построение графиков кривых обучения моделей")
+        model_info_list = st.session_state.model_info_list
+        model_learning_curve = []
+        valid_models = []
+        for model_info in model_info_list:
+            if model_info.learning_curve is not None:
+                valid_models.append(model_info)
+                if st.checkbox(model_info.name, value=False):
+                    model_learning_curve.append(model_info)
+
+        if model_learning_curve:
+            plt_learning_curve(model_learning_curve)
+        elif valid_models:
+            st.warning("Выберите хотя бы одну модель для отображения.")
+    else:
+        st.error("Список моделей не найден в состоянии сессии.")
+        logger.error("Список моделей не найден в состоянии сессии.")
+
+
+def show_model_statistics(model_info: ModelInfo) -> None:
     """Функция для отображения информации об обученной модели."""
+
     st.subheader("Информация о модели")
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
         f"""
-    **Название модели:** {model_info.name}
+    **Название модели:** {model_info.name} <br>
     **Гиперпараметры:** {hyperparams_str}
     """,
+        unsafe_allow_html=True,
     )
 
     logger.info("Для клиента отображена основная информация об обученной модели")
 
-    learning_curve = model_info.learning_curve
-    if learning_curve is not None:
-        st.subheader("Полученные кривые обучения")
-        plt_learning_curve(learning_curve.train_sizes, learning_curve.train_scores, learning_curve.test_scores)
 
-
-def delete_model(url_server, model_id):
+def delete_model(url_server: str, model_id: str) -> bool:
     """Функция для удаления обученной модели."""
-    response = requests.delete(url_server + f"models/remove/{model_id}")
-    if response.status_code == 200:
-        return True
+    try:
+        response = requests.delete(url_server + f"models/remove/{model_id}", timeout=90)
+        if response.status_code == 200:
+            return True
+
+    except requests.exceptions.Timeout:
+        timeout_handler()
+
     return False
 
 
-def delete_all_models(url_server):
+def delete_all_models(url_server: str) -> bool:
     """Функция для удаления всех обученных моделей."""
-    response = requests.delete(url_server + "models/remove_all")
-    if response.status_code == 200:
-        return True
+    try:
+        response = requests.delete(url_server + "models/remove_all", timeout=90)
+        if response.status_code == 200:
+            return True
+
+    except requests.exceptions.Timeout:
+        timeout_handler()
+
     return False
 
 
-def get_models_list(url_server):
+def get_models_list(url_server: str) -> list[ModelInfo] | None:
     """Функция для получения списка всех обученных моделей."""
     try:
         with st.spinner("Загрузка списка моделей..."):
             logger.info("Загрузка списка моделей с сервера")
             model_info_list = []
-            response = requests.get(url_server + "models/list_models")
+            response = requests.get(url_server + "models/list_models", timeout=90)
             model_data = response.json()
             if not model_data:
                 st.warning("Список моделей пуст.")
@@ -101,6 +161,10 @@ def get_models_list(url_server):
         st.error("Ошибка получения списка моделей: Проверьте сервер.")
         return None
 
+    except requests.exceptions.Timeout:
+        timeout_handler()
+        return None
+
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении списка моделей: {req_err}")
         st.error("Ошибка получения списка моделей: Проверьте соединение.")
@@ -112,7 +176,7 @@ def get_models_list(url_server):
         return None
 
 
-def show_models_list(url_server):
+def show_models_list(url_server: str) -> None:
     """Функция для отображения на странице списка обученных моделей с возможностью их выбора и удаления."""
     st.subheader("Выбор существующих моделей")
     if "selected_model_name" not in st.session_state:
@@ -120,7 +184,7 @@ def show_models_list(url_server):
 
     model_info_list = get_models_list(url_server)
 
-    if len(model_info_list) != 0:
+    if model_info_list is not None:
         model_names = [model.name for model in model_info_list]
         selected_model_name = st.selectbox(
             "Выберите уже обученную модель",
@@ -137,7 +201,6 @@ def show_models_list(url_server):
         if selected_model_info.id != "baseline":
             if st.button(f"Удалить модель {selected_model_name}"):
                 delete_model(url_server, selected_model_info.id)
-                model_info_list = [model for model in model_info_list if model.name != selected_model_name]
                 logger.info(f"Модель {selected_model_name} успешно удалена")
                 st.rerun()
 
@@ -147,7 +210,7 @@ def show_models_list(url_server):
             st.rerun()
 
 
-def show_forms_create_model(url_server):
+def show_forms_create_model(url_server: str) -> None:
     """Функция для отображения на странице формы подготовки модели для обучения."""
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
 
@@ -167,8 +230,9 @@ def show_forms_create_model(url_server):
     if st.button(":red[**Начать обучение модели**]"):
         with st.spinner("Обучение модели..."):
             logger.info(f"Обучение новой модели {name_model}")
-            response = requests.post(url_server + "models/fit", json=fit_json)
+
             try:
+                response = requests.post(url_server + "models/fit", json=fit_json, timeout=90)
                 response_data = json.loads(response.text)
                 model_info = ModelInfo(**response_data)
                 st.session_state.selected_model_name = model_info.name
@@ -179,6 +243,9 @@ def show_forms_create_model(url_server):
                 st.error("Ошибка сервера при обучении модели.")
                 logger.error(f"HTTP ошибка: {http_err}")
 
+            except requests.exceptions.Timeout:
+                timeout_handler()
+
             except requests.exceptions.RequestException as req_err:
                 st.error("Ошибка сети при обучении модели.")
                 logger.error(f"Ошибка сети: {req_err}")
@@ -188,7 +255,8 @@ def show_forms_create_model(url_server):
                 logger.error(f"Ошибка декодирования JSON: {json_err}")
 
 
-def model_training_page(url_server):
+def model_training_page(url_server: str):
     """Функция для заполнения страницы с подготовкой модели для обучения."""
     show_models_list(url_server)
+    change_models_learning_curve()
     show_forms_create_model(url_server)
