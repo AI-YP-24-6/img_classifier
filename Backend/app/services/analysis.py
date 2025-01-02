@@ -62,7 +62,7 @@ def duplicates_info() -> dict[str, int]:
     return duplicates
 
 
-def sizes_info():
+def sizes_info() -> list[list[str | Any]]:
     """
     Возвращает строки для таблицы размеров изображений
     """
@@ -77,15 +77,16 @@ def sizes_info():
     return row_list
 
 
-def check_image_color(folder_path, cl):
+def check_image_color(folder_path: str, cl: str) -> list[list[str | Any]]:
     """
     Формирование строк с информацией о цветах изображений
+    :param folder_path: путь к папке с классом
+    :param cl: название класса
     """
     colors = []
     for img in os.listdir(folder_path):
         image = Image.open(os.path.join(folder_path, img))
         img_rgb = image.convert("RGB")
-        np_img = np.array(img_rgb)
         np_img = np.array(img_rgb)
 
         r = np_img[:, :, 0].flatten()
@@ -106,7 +107,7 @@ def check_image_color(folder_path, cl):
     return colors
 
 
-def colors_info():
+def colors_info() -> list[list[str | Any]]:
     """
     Возвращает строки для таблицы цветов изображений
     """

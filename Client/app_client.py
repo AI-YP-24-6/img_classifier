@@ -5,7 +5,7 @@ from model_inference import model_inference
 from model_training_page import model_training_page
 from streamlit_option_menu import option_menu
 
-from logs.logger_config import configure_client_logging
+from Tools.logger_config import configure_client_logging
 
 configure_client_logging()
 

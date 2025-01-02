@@ -10,7 +10,7 @@ from Backend.app.api.models import FitRequest, ModelInfo
 
 
 def plt_learning_curve(train_sizes, train_scores, test_scores):
-    """Функция для отображение графика кривых обучения модели."""
+    """Функция для отображения графика кривых обучения модели."""
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
 
@@ -43,7 +43,7 @@ def plt_learning_curve(train_sizes, train_scores, test_scores):
 
 
 def show_model_statistics(model_info):
-    """Функция для отображение информации об обученной модели."""
+    """Функция для отображения информации об обученной модели."""
     st.subheader("Информация о модели")
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
     st.markdown(
@@ -172,8 +172,8 @@ def show_forms_create_model(url_server):
                 response_data = json.loads(response.text)
                 model_info = ModelInfo(**response_data)
                 st.session_state.selected_model_name = model_info.name
-                st.rerun()
                 logger.info(f"Модель {name_model} успешно обучена")
+                st.rerun()
 
             except requests.exceptions.HTTPError as http_err:
                 st.error("Ошибка сервера при обучении модели.")

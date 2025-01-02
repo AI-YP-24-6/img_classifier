@@ -2,11 +2,12 @@ FROM python:3.12-slim-bookworm
 
 COPY pyproject.toml poetry.lock /workdir/
 COPY Backend/ /workdir/Backend
+COPY Tools/ /workdir/Tools
 
 WORKDIR /workdir
 
-RUN apt-cache update \
-    && apt-cache install -y libgl1-mesa-glx libglib2.0-0 --no-install-recommends && \
+RUN apt-get update \
+    && apt-get install -y libgl1-mesa-glx=22.3.6-1+deb12u1 libglib2.0-0=2.74.6-2+deb12u4 --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

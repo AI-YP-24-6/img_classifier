@@ -1,0 +1,24 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: client.Dockerfile
+    ports:
+      - "8501:8501"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    ports:
+      - "54545:54545"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

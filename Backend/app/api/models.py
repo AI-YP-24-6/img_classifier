@@ -4,7 +4,7 @@ from typing import Annotated, Any, Optional, Union
 from pydantic import BaseModel
 
 
-class ApiResponse(BaseModel):  # pylint: disable=too-few-public-methods
+class ApiResponse(BaseModel):
     """
     Ответ сервера на запрос с клиента
     """
@@ -13,7 +13,7 @@ class ApiResponse(BaseModel):  # pylint: disable=too-few-public-methods
     data: Union[dict, None] = None
 
 
-class PredictionResponse(BaseModel):  # pylint: disable=too-few-public-methods
+class PredictionResponse(BaseModel):
     """
     Предсказание класса изображения
     """
@@ -21,7 +21,7 @@ class PredictionResponse(BaseModel):  # pylint: disable=too-few-public-methods
     prediction: Annotated[str, "Предсказание класса изображения"]
 
 
-class ProbabilityResponse(PredictionResponse):  # pylint: disable=too-few-public-methods
+class ProbabilityResponse(PredictionResponse):
     """
     Предсказание класса изображения с вероятностью
     """
@@ -29,7 +29,7 @@ class ProbabilityResponse(PredictionResponse):  # pylint: disable=too-few-public
     probability: Annotated[float, "Вероятность предсказанного класса"]
 
 
-class ModelType(Enum):  # pylint: disable=too-few-public-methods
+class ModelType(Enum):
     """
     Типы моделей
     """
@@ -38,7 +38,7 @@ class ModelType(Enum):  # pylint: disable=too-few-public-methods
     custom = "custom"
 
 
-class LearningCurvelInfo(BaseModel):  # pylint: disable=too-few-public-methods
+class LearningCurveInfo(BaseModel):
     """
     Информация о кривой обучения модели
     """
@@ -48,7 +48,7 @@ class LearningCurvelInfo(BaseModel):  # pylint: disable=too-few-public-methods
     test_scores: Annotated[list[list[float]], "Результаты тестовых сетов"]
 
 
-class ModelInfo(BaseModel):  # pylint: disable=too-few-public-methods
+class ModelInfo(BaseModel):
     """
     Информация об обученной модели
     """
@@ -56,11 +56,11 @@ class ModelInfo(BaseModel):  # pylint: disable=too-few-public-methods
     id: Annotated[str, "Id модели"]
     hyperparameters: Annotated[dict[str, Any], "Гиперпараметры модели"]
     type: Annotated[ModelType, "Тип модели"]
-    learning_curve: Annotated[Optional[LearningCurvelInfo], "Данные для кривой обучения модели"]
+    learning_curve: Annotated[Optional[LearningCurveInfo], "Данные для кривой обучения модели"]
     name: Annotated[str, "Название модели"]
 
 
-class LoadRequest(BaseModel):  # pylint: disable=too-few-public-methods
+class LoadRequest(BaseModel):
     """
     Запрос на загрузку обученной модели
     """
@@ -68,7 +68,7 @@ class LoadRequest(BaseModel):  # pylint: disable=too-few-public-methods
     id: Annotated[str, "Id модели. Если требуется baseline-модель, то следует использовать Id='baseline'"]
 
 
-class FitRequest(BaseModel):  # pylint: disable=too-few-public-methods
+class FitRequest(BaseModel):
     """
     Запрос на обучение модели с указанием названия модели, гиперпараметров и сохранения кривой обучения
     """
@@ -78,7 +78,7 @@ class FitRequest(BaseModel):  # pylint: disable=too-few-public-methods
     name: Annotated[str, "Название модели"]
 
 
-class TableModel(BaseModel):  # pylint: disable=too-few-public-methods
+class TableModel(BaseModel):
     """
     Модель таблицы, содержащая ее столбцы и строки
     """
@@ -87,7 +87,7 @@ class TableModel(BaseModel):  # pylint: disable=too-few-public-methods
     rows: Annotated[list[list[Any]], "Строки таблицы"]
 
 
-class DatasetInfo(BaseModel):  # pylint: disable=too-few-public-methods
+class DatasetInfo(BaseModel):
     """
     Информация о датасете:
     - количестве изображений в каждом классе
