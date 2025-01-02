@@ -12,7 +12,7 @@ def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> d
     """Функция для получения предсказания на обученной модели."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
-        response = requests.post(f"{url_server}{endpoint}", files=files)
+        response = requests.post(f"{url_server}{endpoint}", files=files, timeout=90)
         response.raise_for_status()
         return response.json()
 
@@ -31,6 +31,11 @@ def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> d
         logger.error(f"Ошибка декодирования JSON: {json_err}")
         return None
 
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+        return None
+
 
 def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> bool:
     """Функция загрузки обученной модели на сервер"""
@@ -41,7 +46,7 @@ def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> b
             load_model = LoadRequest(id=selected_model_info.id)
             load_json = load_model.model_dump()
 
-            requests.post(f"{url_server}models/load", json=load_json)
+            requests.post(f"{url_server}models/load", json=load_json, timeout=90)
             st.success(f"Модель {selected_model_info.name} успешно подготовлена для предсказания")
             logger.info(f"Модель {selected_model_info.name} успешно подготовлена для предсказания")
             return True
@@ -49,6 +54,11 @@ def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> b
         except requests.exceptions.RequestException as e:
             st.error("Произошла ошибка при попытке загрузить модель. Проверьте соединение с сервером.")
             logger.exception(f"Ошибка получения ответа от сервера: {e}")
+            return False
+        
+        except requests.exceptions.Timeout:
+            st.error("Превышено время ожидания ответа от сервера.")
+            logger.error("Превышено время ожидания ответа от сервера")
             return False
 
 

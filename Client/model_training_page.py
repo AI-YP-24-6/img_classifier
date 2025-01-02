@@ -105,18 +105,31 @@ def show_model_statistics(model_info: ModelInfo) -> None:
 
 def delete_model(url_server: str, model_id: str) -> bool:
     """Функция для удаления обученной модели."""
-    response = requests.delete(url_server + f"models/remove/{model_id}")
-    if response.status_code == 200:
-        return True
+    try:
+        response = requests.delete(url_server + f"models/remove/{model_id}", timeout=90)
+        if response.status_code == 200:
+            return True
+
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+    
     return False
 
 
 def delete_all_models(url_server: str) -> bool:
     """Функция для удаления всех обученных моделей."""
-    response = requests.delete(url_server + "models/remove_all")
-    if response.status_code == 200:
-        return True
+    try:
+        response = requests.delete(url_server + "models/remove_all", timeout=90)
+        if response.status_code == 200:
+            return True
+        
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+    
     return False
+
 
 
 def get_models_list(url_server: str) -> list[ModelInfo] | None:
@@ -125,7 +138,7 @@ def get_models_list(url_server: str) -> list[ModelInfo] | None:
         with st.spinner("Загрузка списка моделей..."):
             logger.info("Загрузка списка моделей с сервера")
             model_info_list = []
-            response = requests.get(url_server + "models/list_models")
+            response = requests.get(url_server + "models/list_models", timeout=90)
             model_data = response.json()
             if not model_data:
                 st.warning("Список моделей пуст.")
@@ -146,6 +159,11 @@ def get_models_list(url_server: str) -> list[ModelInfo] | None:
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении списка моделей: {req_err}")
         st.error("Ошибка получения списка моделей: Проверьте соединение.")
+        return None
+
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
         return None
 
     except json.JSONDecodeError as json_err:

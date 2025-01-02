@@ -31,7 +31,7 @@ def show_images(url_server: str):
     st.subheader("Примеры изображений по классам")
     try:
         with st.spinner("Ожидаем загрузки изображений..."):
-            response = requests.get(url_server + "dataset/samples")
+            response = requests.get(url_server + "dataset/samples", timeout = 90)
             img = Image.open(BytesIO(response.content))
             st.image(img, caption="Загруженные изображения", use_container_width=True)
             logger.info("Изображения успешно загружены и отображены для клиента")
@@ -47,7 +47,11 @@ def show_images(url_server: str):
     except OSError as io_err:
         logger.error(f"Ошибка обработки изображения: {io_err}")
         st.error("Ошибка обработки изображения: Не удалось открыть изображение.")
-
+    
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+        
 
 def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
     """Функция для отображения графика отклонений по каналам RGB для конкретного класса."""
@@ -82,7 +86,7 @@ def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
 def show_eda(url_server: str):
     """Функция для отображения основных статистик датасета."""
     try:
-        response = requests.get(url_server + "dataset/info")
+        response = requests.get(url_server + "dataset/info", timeout = 90)
         response_data = json.loads(response.text)
         dataset_info = DatasetInfo(**response_data)
         st.subheader("Основные статистики:")
@@ -122,6 +126,11 @@ def show_eda(url_server: str):
     except json.JSONDecodeError as json_err:
         logger.error(f"Ошибка декодирования JSON данных: {json_err}")
         st.error("Ошибка получения EDA данных: Неверный формат данных.")
+    
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+        return None
 
 
 def eda_page(url_server: str):
@@ -139,16 +148,22 @@ def eda_page(url_server: str):
     if uploaded_file is not None:
         files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
         with st.spinner("Ожидаем загрузки датасета на сервер..."):
-            response = requests.post(url_server + "dataset/load", files=files)
-            if response.status_code == 201:
-                st.session_state.uploaded_file = uploaded_file
-                st.success(f"Новый датасет {uploaded_file.name} успешно загружен на сервер")
-                logger.info("Датасет успешно загружен на сервер")
-                show_eda(url_server)
-                show_images(url_server)
-            else:
-                logger.error(f"Произошла ошибка: {response.text}")
-                st.error(f"Произошла ошибка: {response.text}")
+            try:
+                response = requests.post(url_server + "dataset/load", files=files, timeout=90)
+                if response.status_code == 201:
+                    st.session_state.uploaded_file = uploaded_file
+                    st.success(f"Новый датасет {uploaded_file.name} успешно загружен на сервер")
+                    logger.info("Датасет успешно загружен на сервер")
+                    show_eda(url_server)
+                    show_images(url_server)
+                else:
+                    logger.error(f"Произошла ошибка: {response.text}")
+                    st.error(f"Произошла ошибка: {response.text}")
+            
+            except requests.exceptions.Timeout:
+                st.error("Превышено время ожидания ответа от сервера.")
+                logger.error("Превышено время ожидания ответа от сервера")
+                
     elif "uploaded_file" in st.session_state and st.session_state.uploaded_file is not None:
         logger.info(f"На сервере уже есть датасет {st.session_state.uploaded_file.name}")
         st.subheader(f"**Датасет:** {st.session_state.uploaded_file.name}")
