@@ -96,9 +96,10 @@ async def get_dataset_info() -> DatasetInfo:
     Возвращается количество изображений в каждом классе, дубли, таблица размеров и цветов.
     """
     dataset_uploaded = check_dataset_uploaded()
-    if dataset_uploaded is False:
-        # Не логгируется, т.к. не ошибка
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нет загруженного набора данных!")
+    if not dataset_uploaded:
+        message = "Нет загруженного набора данных!"
+        logger.info(message)
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=message)
     if dataset_info.is_empty:
         dataset_info.classes = classes_info()
         dataset_info.duplicates = duplicates_info()
@@ -120,7 +121,8 @@ async def dataset_samples() -> StreamingResponse:
     """
     Возвращает картинку с примерами изображений по каждому классу
     """
-    if dataset_info.is_empty:
+    dataset_uploaded = check_dataset_uploaded()
+    if not dataset_uploaded:
         logger.exception("Нет загруженного набора данных!")
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нет загруженного набора данных!")
     try:
@@ -143,6 +145,10 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
     Есть возможность дополнительно получить кривую обучения, указав `with_learning_curve=True`
     Также для обучения модели передаются гиперпараметры вида `pca__` и `svc__`
     """
+    dataset_uploaded = check_dataset_uploaded()
+    if not dataset_uploaded:
+        logger.exception("Нет загруженного набора данных!")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Нет загруженного набора данных!")
     manager = Manager()
     model_manager = manager.dict()
     try:

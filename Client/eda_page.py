@@ -99,12 +99,12 @@ def show_eda(url_server: str) -> None:
         logger.info("Вывод основных статистик для датасета")
 
         st.subheader("График распределения изображений по классам:")
-        show_bar(dataset_info.classes.keys(), (dataset_info.classes.values()))
+        show_bar(list(dataset_info.classes.keys()), list(dataset_info.classes.values()))
         logger.info("Отображение графика распределения изображений по классам")
 
         if dataset_info.duplicates is not None:
             st.subheader("График распределения дубликатов по классам:")
-            show_bar(dataset_info.duplicates.keys(), dataset_info.duplicates.values())
+            show_bar(list(dataset_info.duplicates.keys()), list(dataset_info.duplicates.values()))
             logger.info("Отображение графика распределения дубликатов по классам")
         else:
             st.write("**Дубликатов нет**")
