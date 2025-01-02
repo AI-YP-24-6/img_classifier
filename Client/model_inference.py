@@ -4,20 +4,25 @@ import requests
 import streamlit as st
 from loguru import logger
 
-from Backend.app.api.models import LoadRequest, PredictionResponse, ProbabilityResponse
+from Backend.app.api.models import LoadRequest, ModelInfo, PredictionResponse, ProbabilityResponse
 
 
-def make_prediction(url_server, files, use_probability):
-    """Функция для получения предсказания на обученной моделе."""
+def make_prediction(url_server: str, files: dict[str, tuple[str, bytes, str]], use_probability: bool) -> dict | None:
+    """Функция для получения предсказания на обученной модели."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
-        response = requests.post(f"{url_server}{endpoint}", files=files)
+        response = requests.post(f"{url_server}{endpoint}", files=files, timeout=90)
         response.raise_for_status()
         return response.json()
 
     except requests.exceptions.HTTPError as http_err:
         st.error(f"HTTP ошибка во время предсказания: {http_err}")
         logger.error(f"HTTP ошибка во время предсказания: {http_err}")
+        return None
+
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
         return None
 
     except requests.exceptions.RequestException as req_err:
@@ -31,7 +36,7 @@ def make_prediction(url_server, files, use_probability):
         return None
 
 
-def download_trained_model(url_server, selected_model_info):
+def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> bool:
     """Функция загрузки обученной модели на сервер"""
     with st.spinner("Загрузка модели для предсказания..."):
         try:
@@ -40,10 +45,15 @@ def download_trained_model(url_server, selected_model_info):
             load_model = LoadRequest(id=selected_model_info.id)
             load_json = load_model.model_dump()
 
-            requests.post(f"{url_server}models/load", json=load_json)
+            requests.post(f"{url_server}models/load", json=load_json, timeout=90)
             st.success(f"Модель {selected_model_info.name} успешно подготовлена для предсказания")
             logger.info(f"Модель {selected_model_info.name} успешно подготовлена для предсказания")
             return True
+
+        except requests.exceptions.Timeout:
+            st.error("Превышено время ожидания ответа от сервера.")
+            logger.error("Превышено время ожидания ответа от сервера")
+            return False
 
         except requests.exceptions.RequestException as e:
             st.error("Произошла ошибка при попытке загрузить модель. Проверьте соединение с сервером.")
@@ -51,8 +61,8 @@ def download_trained_model(url_server, selected_model_info):
             return False
 
 
-def model_inference(url_server):
-    """Функция для получения предсказания на обученной моделе."""
+def model_inference(url_server: str) -> None:
+    """Функция для получения предсказания на обученной модели."""
     st.header("Инференс с использованием обученной модели")
 
     if "model_info_list" in st.session_state:

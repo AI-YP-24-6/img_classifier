@@ -1,45 +1,66 @@
-from dataclasses import dataclass
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from Backend.app.api.models import ModelType
 from Backend.app.api.v1.api_route import models, router_dataset, router_models
 
 # Импорт нужен для работы baseline
 from Backend.app.services.model_loader import load_model
-from Backend.app.services.pipeline import HogTransformer  # pylint: disable=unused-import # noqa: F401
-from logs.logger_config import configure_server_logging
+from Tools.logger_config import configure_server_logging
+
+
+class Settings(BaseSettings):
+    """
+    Класс загрузки и валидации настроек из .env
+    """
+
+    model_config = SettingsConfigDict(
+        env_file="../../.env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
+    )
+    uvicorn_host: str = Field(
+        "127.0.0.1", validate_default=False, pattern="[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}"
+    )
+    uvicorn_port: int = Field(54545, validate_default=False, lt=65535, ge=0)
+    uvicorn_reload: bool = False
+
+
+settings = Settings()
 
 configure_server_logging()
 
 
-app = FastAPI(
-    title="Классификатор изображений фруктов и овощей",
-    docs_url="/api/openapi",
-    openapi_url="/api/openapi.json",
-)
-
-
-@app.on_event("startup")
-def load_baseline_model():
+@asynccontextmanager
+async def lifespan(_: FastAPI):
     """
+    Логика, выполняющаяся при старте и остановке приложения
     Загрузка baseline-модели при старте сервера
     """
     baseline_model = load_model()
     models["baseline"] = {
         "id": "baseline",
         "type": ModelType.baseline,
-        "hyperparameters": {"pca__n_components": 0.6},
+        "hyperparameters": {"pca__n_components": 0.6, "svc_probability": True},
         "model": baseline_model,
         "name": "Baseline",
         "learning_curve": None,
     }
+    yield
 
 
-class StatusResponse(BaseModel):  # pylint: disable=too-few-public-methods
+app = FastAPI(
+    title="Классификатор изображений фруктов и овощей",
+    docs_url="/api/openapi",
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan,
+)
+
+
+class StatusResponse(BaseModel):
     """
     Статус работы сервиса
     """
@@ -60,6 +81,5 @@ async def root():
 app.include_router(router_dataset)
 app.include_router(router_models)
 
-
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=54545, reload=True)
+    uvicorn.run("main:app", host=settings.uvicorn_host, port=settings.uvicorn_port, reload=settings.uvicorn_reload)

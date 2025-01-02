@@ -15,35 +15,43 @@ jupyter = "~1.1.1"
 ipykernel = "~6.29.5"
 pandas = "~2.2.3"
 kaggle = "^1.6.17"
-isort = "^5.13.2"
-black = "^24.10.0"
-flake8 = "^7.1.1"
-pre-commit = "^4.0.1"
-mkdocs-material = "~9.5.49"
-mkdocstrings = { extras = ["python"], version = "^0.27.0" }
-griffe-typingdoc = "^0.2.7"
-mkdocs-jupyter = "^0.25.1"
 scikit-image = "0.25.0"
-matplotlib = "~3.9.2"
+matplotlib = "~3.10.0"
 seaborn = "^0.13.2"
 gdown = "^5.2.0"
 exif = "^1.6.1"
 plotly = "^5.24.1"
 notebook = "^7.2.2"
-pycodestyle = "^2.12.1"
-pylint = "^3.3.2"
 uvicorn = "^0.34.0"
 fastapi = "^0.115.6"
 scikit-learn = "^1.6.0"
 opencv-python = "^4.10.0.84"
 python-multipart = "^0.0.20"
 loguru = "^0.7.3"
-streamlit-project-template = "^0.1.2"
-streamlit-option-menu = "^0.4.0"
+pydantic-settings = "^2.7.0"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.client.dependencies]
 streamlit = "^1.41.1"
+streamlit-project-template = "^0.1.2"
+streamlit-option-menu = "^0.4.0"
+
+
+[tool.poetry.group.linters.dependencies]
+pre-commit = "^4.0.1"
+pylint = "^3.3.3"
+flake8 = "^7.1.1"
+isort = "^5.13.2"
+black = "^24.10.0"
+pycodestyle = "^2.12.1"
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "~9.5.49"
+mkdocstrings = { extras = ["python"], version = "^0.27.0" }
+mkdocs-jupyter = "^0.25.1"
+griffe-typingdoc = "^0.2.7"
 
 [build-system]
 requires = ["poetry-core"]

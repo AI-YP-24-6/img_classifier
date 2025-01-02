@@ -42,7 +42,7 @@ repos:
                 name: pylint
                 args:
                   [ --max-line-length=120,
-                    "--disable=C0103,C0114,C0115,E0401"
+                    "--disable=C0103,C0114,C0115,E0401,R0903"
                   ]
     -   repo: https://github.com/koalaman/shellcheck-precommit
         rev: v0.10.0
