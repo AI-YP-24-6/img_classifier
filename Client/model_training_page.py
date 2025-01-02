@@ -10,6 +10,14 @@ from loguru import logger
 from Backend.app.api.models import FitRequest, ModelInfo
 
 
+def timeout_handler() -> None:
+    """
+    Функция обработки стандартного таймаута
+    """
+    st.error("Превышено время ожидания ответа от сервера.")
+    logger.error("Превышено время ожидания ответа от сервера")
+
+
 def plt_learning_curve(model_info_list: list[ModelInfo]) -> None:
     """Функция для отображения графика кривых обучения модели."""
     plt.figure(figsize=(10, 6))
@@ -111,8 +119,7 @@ def delete_model(url_server: str, model_id: str) -> bool:
             return True
 
     except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
+        timeout_handler()
 
     return False
 
@@ -125,8 +132,7 @@ def delete_all_models(url_server: str) -> bool:
             return True
 
     except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
+        timeout_handler()
 
     return False
 
@@ -155,14 +161,13 @@ def get_models_list(url_server: str) -> list[ModelInfo] | None:
         st.error("Ошибка получения списка моделей: Проверьте сервер.")
         return None
 
+    except requests.exceptions.Timeout:
+        timeout_handler()
+        return None
+
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении списка моделей: {req_err}")
         st.error("Ошибка получения списка моделей: Проверьте соединение.")
-        return None
-
-    except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
         return None
 
     except json.JSONDecodeError as json_err:
@@ -239,8 +244,7 @@ def show_forms_create_model(url_server: str) -> None:
                 logger.error(f"HTTP ошибка: {http_err}")
 
             except requests.exceptions.Timeout:
-                st.error("Превышено время ожидания ответа от сервера.")
-                logger.error("Превышено время ожидания ответа от сервера")
+                timeout_handler()
 
             except requests.exceptions.RequestException as req_err:
                 st.error("Ошибка сети при обучении модели.")

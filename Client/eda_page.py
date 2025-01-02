@@ -14,7 +14,7 @@ from PIL import Image
 from Backend.app.api.models import DatasetInfo
 
 
-def show_bar(classes: list[str], counts: list[int]):
+def show_bar(classes: list[str], counts: list[int]) -> None:
     """Функция для построения столбчатых диаграмм."""
     plt.figure(figsize=(35, 20))
     plt.bar(classes, counts, color="#008080")
@@ -26,7 +26,7 @@ def show_bar(classes: list[str], counts: list[int]):
     plt.close()
 
 
-def show_images(url_server: str):
+def show_images(url_server: str) -> None:
     """Функция для отображения примеров изображений с каждого класса."""
     st.subheader("Примеры изображений по классам")
     try:
@@ -40,6 +40,10 @@ def show_images(url_server: str):
         logger.error(f"HTTP ошибка при получении изображений с датасета: {http_err}")
         st.error("Ошибка получения изображений с датасета: Проверьте сервер.")
 
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении изображений с датасета: {req_err}")
         st.error("Ошибка получения изображений с датасета: Проверьте соединение.")
@@ -48,12 +52,8 @@ def show_images(url_server: str):
         logger.error(f"Ошибка обработки изображения: {io_err}")
         st.error("Ошибка обработки изображения: Не удалось открыть изображение.")
 
-    except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
 
-
-def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
+def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str) -> None:
     """Функция для отображения графика отклонений по каналам RGB для конкретного класса."""
     rows = rgb_df[rgb_df["class"] == cls].values
     mean_r = np.mean(rows[:, 2])
@@ -83,7 +83,7 @@ def show_bar_std_mean_rgb(rgb_df: DataFrame, cls: str):
     logger.info(f"Отображение графика отклонений по каналам RGB для класса {cls}")
 
 
-def show_eda(url_server: str):
+def show_eda(url_server: str) -> None:
     """Функция для отображения основных статистик датасета."""
     try:
         response = requests.get(url_server + "dataset/info", timeout=90)
@@ -119,6 +119,10 @@ def show_eda(url_server: str):
         logger.error(f"HTTP ошибка при получении EDA данных: {http_err}")
         st.error("Ошибка получения EDA данных: Проверьте сервер.")
 
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+
     except requests.exceptions.RequestException as req_err:
         logger.error(f"Ошибка сети при получении EDA данных: {req_err}")
         st.error("Ошибка получения EDA данных: Проверьте соединение.")
@@ -127,13 +131,8 @@ def show_eda(url_server: str):
         logger.error(f"Ошибка декодирования JSON данных: {json_err}")
         st.error("Ошибка получения EDA данных: Неверный формат данных.")
 
-    except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
-        return None
 
-
-def eda_page(url_server: str):
+def eda_page(url_server: str) -> None:
     """Функция для заполнения страницы с EDA."""
     st.header("EDA для датасета изображений")
     st.subheader("Загрузка данных")

@@ -1,5 +1,4 @@
 import json
-from io import BytesIO
 
 import requests
 import streamlit as st
@@ -8,7 +7,7 @@ from loguru import logger
 from Backend.app.api.models import LoadRequest, ModelInfo, PredictionResponse, ProbabilityResponse
 
 
-def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> dict:
+def make_prediction(url_server: str, files: dict[str, tuple[str, bytes, str]], use_probability: bool) -> dict | None:
     """Функция для получения предсказания на обученной модели."""
     try:
         endpoint = "models/predict_proba" if use_probability else "models/predict"
@@ -21,6 +20,11 @@ def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> d
         logger.error(f"HTTP ошибка во время предсказания: {http_err}")
         return None
 
+    except requests.exceptions.Timeout:
+        st.error("Превышено время ожидания ответа от сервера.")
+        logger.error("Превышено время ожидания ответа от сервера")
+        return None
+
     except requests.exceptions.RequestException as req_err:
         st.error(f"Сетевая ошибка во время предсказания: {req_err}")
         logger.error(f"Сетевая ошибка во время предсказания: {req_err}")
@@ -29,11 +33,6 @@ def make_prediction(url_server: str, files: BytesIO, use_probability: bool) -> d
     except json.JSONDecodeError as json_err:
         st.error(f"Ошибка декодирования JSON: {json_err}")
         logger.error(f"Ошибка декодирования JSON: {json_err}")
-        return None
-
-    except requests.exceptions.Timeout:
-        st.error("Превышено время ожидания ответа от сервера.")
-        logger.error("Превышено время ожидания ответа от сервера")
         return None
 
 
@@ -51,18 +50,18 @@ def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> b
             logger.info(f"Модель {selected_model_info.name} успешно подготовлена для предсказания")
             return True
 
-        except requests.exceptions.RequestException as e:
-            st.error("Произошла ошибка при попытке загрузить модель. Проверьте соединение с сервером.")
-            logger.exception(f"Ошибка получения ответа от сервера: {e}")
-            return False
-
         except requests.exceptions.Timeout:
             st.error("Превышено время ожидания ответа от сервера.")
             logger.error("Превышено время ожидания ответа от сервера")
             return False
 
+        except requests.exceptions.RequestException as e:
+            st.error("Произошла ошибка при попытке загрузить модель. Проверьте соединение с сервером.")
+            logger.exception(f"Ошибка получения ответа от сервера: {e}")
+            return False
 
-def model_inference(url_server: str):
+
+def model_inference(url_server: str) -> None:
     """Функция для получения предсказания на обученной модели."""
     st.header("Инференс с использованием обученной модели")
 
