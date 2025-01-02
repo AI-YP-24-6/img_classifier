@@ -55,7 +55,7 @@ def download_trained_model(url_server: str, selected_model_info: ModelInfo) -> b
             st.error("Произошла ошибка при попытке загрузить модель. Проверьте соединение с сервером.")
             logger.exception(f"Ошибка получения ответа от сервера: {e}")
             return False
-        
+
         except requests.exceptions.Timeout:
             st.error("Превышено время ожидания ответа от сервера.")
             logger.error("Превышено время ожидания ответа от сервера")

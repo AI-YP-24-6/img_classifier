@@ -113,7 +113,7 @@ def delete_model(url_server: str, model_id: str) -> bool:
     except requests.exceptions.Timeout:
         st.error("Превышено время ожидания ответа от сервера.")
         logger.error("Превышено время ожидания ответа от сервера")
-    
+
     return False
 
 
@@ -123,13 +123,12 @@ def delete_all_models(url_server: str) -> bool:
         response = requests.delete(url_server + "models/remove_all", timeout=90)
         if response.status_code == 200:
             return True
-        
+
     except requests.exceptions.Timeout:
         st.error("Превышено время ожидания ответа от сервера.")
         logger.error("Превышено время ожидания ответа от сервера")
-    
-    return False
 
+    return False
 
 
 def get_models_list(url_server: str) -> list[ModelInfo] | None:
