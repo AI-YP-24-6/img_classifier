@@ -10,8 +10,8 @@ from loguru import logger
 from Backend.app.api.models import FitRequest, ModelInfo
 
 
-def plt_learning_curve(model_info_list: list[ModelInfo]):
-    """Функция для отображение графика кривых обучения модели."""
+def plt_learning_curve(model_info_list: list[ModelInfo]) -> None:
+    """Функция для отображения графика кривых обучения модели."""
     plt.figure(figsize=(10, 6))
     colors = sns.color_palette("husl", len(model_info_list))
 
@@ -65,7 +65,7 @@ def plt_learning_curve(model_info_list: list[ModelInfo]):
     logger.info("Построен график кривых обучения модели")
 
 
-def change_models_learning_curve():
+def change_models_learning_curve() -> None:
     """Функция выбора моделей, для которых будет постоен график кривых обучения."""
     if "model_info_list" in st.session_state:
         st.subheader("Построение графиков кривых обучения моделей")
@@ -87,8 +87,8 @@ def change_models_learning_curve():
         logger.error("Список моделей не найден в состоянии сессии.")
 
 
-def show_model_statistics(model_info: ModelInfo):
-    """Функция для отображение информации об обученной модели."""
+def show_model_statistics(model_info: ModelInfo) -> None:
+    """Функция для отображения информации об обученной модели."""
 
     st.subheader("Информация о модели")
     hyperparams_str = "".join([f"\n- **{key} =** {value}" for key, value in model_info.hyperparameters.items()])
@@ -119,7 +119,7 @@ def delete_all_models(url_server: str) -> bool:
     return False
 
 
-def get_models_list(url_server: str) -> list[ModelInfo]:
+def get_models_list(url_server: str) -> list[ModelInfo] | None:
     """Функция для получения списка всех обученных моделей."""
     try:
         with st.spinner("Загрузка списка моделей..."):
@@ -154,7 +154,7 @@ def get_models_list(url_server: str) -> list[ModelInfo]:
         return None
 
 
-def show_models_list(url_server: str):
+def show_models_list(url_server: str) -> None:
     """Функция для отображения на странице списка обученных моделей с возможностью их выбора и удаления."""
     st.subheader("Выбор существующих моделей")
     if "selected_model_name" not in st.session_state:
@@ -188,7 +188,7 @@ def show_models_list(url_server: str):
             st.rerun()
 
 
-def show_forms_create_model(url_server: str):
+def show_forms_create_model(url_server: str) -> None:
     """Функция для отображения на странице формы подготовки модели для обучения."""
     st.subheader("Создание новой модели SVC и выбор гиперпараметров")
 
@@ -214,12 +214,16 @@ def show_forms_create_model(url_server: str):
                 response_data = json.loads(response.text)
                 model_info = ModelInfo(**response_data)
                 st.session_state.selected_model_name = model_info.name
-                st.rerun()
                 logger.info(f"Модель {name_model} успешно обучена")
+                st.rerun()
 
             except requests.exceptions.HTTPError as http_err:
                 st.error("Ошибка сервера при обучении модели.")
                 logger.error(f"HTTP ошибка: {http_err}")
+
+            except requests.exceptions.Timeout:
+                st.error("Превышено время ожидания ответа от сервера.")
+                logger.error("Превышено время ожидания ответа от сервера")
 
             except requests.exceptions.RequestException as req_err:
                 st.error("Ошибка сети при обучении модели.")
@@ -228,10 +232,6 @@ def show_forms_create_model(url_server: str):
             except json.JSONDecodeError as json_err:
                 st.error("Ошибка при обработке ответа сервера.")
                 logger.error(f"Ошибка декодирования JSON: {json_err}")
-
-            except requests.exceptions.Timeout:
-                st.error("Превышено время ожидания ответа от сервера.")
-                logger.error("Превышено время ожидания ответа от сервера")
 
 
 def model_training_page(url_server: str):
