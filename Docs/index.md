@@ -41,7 +41,81 @@ ___
 
 ## Project layout
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+```bash
+.
+├── Backend                             # backend FastAPI app
+│    ├── app
+│    │    ├── __init__.py
+│    │    ├── api
+│    │    │    ├── __init__.py
+│    │    │    ├── models.py            # файл описания моделей данных
+│    │    │    └── v1
+│    │    │        ├── __init__.py
+│    │    │        └── api_route.py     # файл с роутами FastAPI
+│    │    ├── main.py                   # основной файл приложения
+│    │    └── services                  # вспомогательные файлы
+│    │        ├── __init__.py
+│    │        ├── analysis.py
+│    │        ├── model_loader.py
+│    │        ├── model_trainer.py
+│    │        ├── pipeline.py
+│    │        ├── preprocessing.py
+│    │        └── preview.py
+│    └── data
+│        └── baseline.pkl               # подготовленная модель
+├── Baseline                            # baseline ML моделей
+│    ├── baseline.ipynb
+│    ├── baseline.md
+│    ├── baseline_HOG.ipynb
+│    ├── baseline_ResNet18.ipynb
+│    ├── baseline_SIFT.ipynb
+│    └── baseline_Vgg16.ipynb
+├── Client                              # streamlit app
+│    ├── app_client.py                  # основной файл приложения
+│    ├── eda_page.py                    # файл отображения статистики модели
+│    ├── model_inference.py             # код для инференса
+│    ├── model_training_page.py         # код для подготовки модели
+│    └── run.py                         # файл для запуска streamlit
+├── Docs                                # документация
+│    ├── eda                            # документация по EDA
+│    └── img                            # изображения для документации
+├── EDA
+│    ├── EDA.md                     # Краткое описание EDA объединенного датасета
+│    ├── EDA_Fruits360.md           # Краткое описание EDA датасета
+│    ├── EDA_Vegetables.md          # Краткое описание EDA датасета
+│    ├── EDA_tasty_fruit.md         # Краткое описание EDA датасета
+│    └── Notebooks
+│         ├── EDA.ipynb             # notebook с EDA объединенного датасета
+│         ├── EDA_Vegetables.ipynb  # notebook с EDA датасета Vegetables
+│         ├── EDA_fruits360.ipynb   # notebook с EDA датасета fruits360
+│         ├── EDA_tasty_fruit.ipynb # notebook с EDA датасета tasty_fruit
+│         └── dataset_merging.ipynb # notebook с объединением датасетов
+├── LICENSE                         # Лицензия MIT
+├── Notebooks                       # Папка с ноутбуками
+│    ├── download_datasets.ipynb    # Загрузка сохраненных датасетов с Yandex disk
+│    ├── goskatalog.ipynb           # notebook анализа датасета goskatalog
+│    ├── kaggle.json.example        # example of kaggle.json
+│    └── parser.ipynb               # notebook парсера сайта goskatalog.ru
+├── README.md                       # Описание проекта
+├── Tools                           # Папка с инструментами проекта
+│    ├── __init__.py                # Позволяет импортировать все модули из файлов директории
+│    ├── analysis.py                # Позволяет находить все jpeg-файлы в директории
+│    ├── download.py                # Позволяет скачать и разархивировать датасет
+│    ├── logger_config.py           # Позволяет настроить логгер для сервера и клиента
+│    ├── notebook.py                # Позволяет обновлять идентификаторы ячеек в ноутбуке
+│    └── parser.py                  # Парсер сайта goskatalog.ru
+├── .dockerignore                   # игнорируемые файлы для Docker
+├── .editorconfig                   # конфигурация редактора IDE
+├── .env.example                    # пример файла .env
+├── .flake8                         # конфигурационный файл для форматера flake8
+├── .gitignore                      # игнорируемые файлы, которые нельзя коммитить в Git
+├── .pre-commit-config.yaml         # конфигурация для pre-commit hook
+├── backend.Dockerfile              # Файл конфигурации docker backend приложения
+├── checkpoint.md                   # Описание этапов проекта
+├── client.Dockerfile               # Файл конфигурации docker client приложения
+├── compose.yaml                    # Файл конфигурации docker-compose
+├── dataset.md                      # Описание датасетов
+├── mkdocs.yml                      # Файл конфигурации mkdocs
+├── poetry.lock                     # Генерируемый файл по зависимостям
+└── pyproject.toml                  # Главный конфигурационный файл
+```

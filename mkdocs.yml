@@ -31,6 +31,8 @@ theme:
         - content.code.annotate
 
 markdown_extensions:
+    - smarty  # замена части символов ASCII
+    - pymdownx.blocks.caption  # добавляет подпись к блокам и картинкам
     - attr_list
     - admonition
     - pymdownx.details
@@ -47,8 +49,8 @@ markdown_extensions:
             base_path: [ '.' ]
     #        base_path: !relative $config_dir # Relative to the root directory with mkdocs.yml
     - pymdownx.superfences
-    - pymdownx.tilde
-    - pymdownx.tabbed
+    - pymdownx.tilde  # <del> <sub>
+    - pymdownx.tabbed  # ===
     - pymdownx.tasklist
 
 plugins:
@@ -86,6 +88,7 @@ nav:
     -   Исследовательский анализ:
             -   Сбор данных: eda/dataset.md
             -   Парсинг: eda/parser.md
+            -   Объединение датасетов: dataset.md
             -   Анализ данных:
                     -   Анализ Fruits360: eda/EDA_Fruits360.md
                     -   Анализ tasty_fruit: eda/EDA_tasty_fruit.md
@@ -93,8 +96,10 @@ nav:
                     -   Анализ goskatalog_art: eda/goskatalog.ipynb
                     -   Анализ объединенного датасета: eda/EDA.md
 
-    -   Телеграм бот: tg_bot.md
+    -   MVP:
+            -   Разработка API: api.md
+            -   Разработка UI: ui.md
     -   Документация модулей:
             -   Tools: tools.md
             -   CI/CD: CI_CD.md
-    -   О проекте: about.md
+    -   О проекте: readme.md
