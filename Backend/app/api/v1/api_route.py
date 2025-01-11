@@ -158,9 +158,20 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
 
         curve = None
         if request.with_learning_curve:
-            train_sizes, train_scores, test_scores = learning_curve(
-                new_model, images, labels, cv=5, scoring="f1_macro", train_sizes=[0.3, 0.6, 0.9]
-            )
+            try:
+                train_sizes, train_scores, test_scores = learning_curve(
+                    new_model,
+                    images,
+                    labels,
+                    cv=5,
+                    scoring="f1_macro",
+                    train_sizes=[0.3, 0.6, 0.9],
+                    error_score="raise",
+                )
+            except ValueError as e:
+                logger.error("Ошибка во время learning_curve: " + str(e))
+                train_sizes, train_scores, test_scores = [0], [[0]], [[0]]
+
             curve = LearningCurveInfo(test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
 
         model_id = str(uuid4())
