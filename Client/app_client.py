@@ -13,7 +13,7 @@ from Tools.logger_config import configure_client_logging
 # Load the .env file
 load_dotenv()
 
-configure_client_logging()
+configure_client_logging("../logs/")
 
 
 if "url_server" not in st.session_state:
