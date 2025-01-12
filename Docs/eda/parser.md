@@ -65,8 +65,8 @@ post_params = {
 ```
 Запросы для получения данных картин и изображение самого большого изображения:
 ```python
-data_url = f"https://goskatalog.ru/muzfo-rest/rest/exhibits/{id картины}"
-image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{id фотографии}?originalName={оригинальное название картины}"
+data_url = f"https://goskatalog.ru/muzfo-rest/rest/exhibits/{id_картины}"
+image_url = f"https://goskatalog.ru/muzfo-imaginator/rest/images/original/{id_фотографии}?originalName={оригинальное_имя}"
 ```
 ## Запуск парсера
 Запускаем парсер, вызывая функцию парсера [Tools.parser.goskatalog_parser()](../tools.md#Tools.parser.goskatalog_parser)
