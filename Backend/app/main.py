@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-configure_server_logging()
+configure_server_logging("../../logs/")
 
 
 @asynccontextmanager
