@@ -5,6 +5,9 @@ env:
 
 on:
   pull_request:
+      paths:
+          - "**.Dockerfile"  # Trigger only on changes to files (commits).
+          - "compose.yaml"
   push:
     branches: [main]
   workflow_dispatch:
@@ -25,7 +28,8 @@ jobs:
 
       - name: Run hadolint
         run: |
-           cat *.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt || true
+           cat *.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt
+           cat compose.yaml | docker run --rm -i hadolint/hadolint >> lint-report.txt
         continue-on-error: true
 
       - name: Limit report to 100 lines
