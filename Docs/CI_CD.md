@@ -35,3 +35,14 @@
 --8<-- "./.github/workflows/linters.yml"
 ```
 Если были обнаружены ошибки, то скрип их исправит и сделает комментарий в pull request.
+
+## Notebook-formater
+
+У ноутбуков из Google colab есть раздел metadata, которые не может обработать nbconvert. Jq скрипт очищает файл от metadata.<br>
+Так же скрипт делает корректные execution_count ячеек
+
+``` yaml linenums="1"
+--8<-- "./.github/workflows/notebook-formater.yml"
+```
+
+Если были обнаружены ошибки, то скрип их исправит и сделает коммит в pull request.
