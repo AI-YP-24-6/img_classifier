@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 
@@ -27,5 +28,12 @@ def set_cell_id(notebook_path: str | Path) -> int:
 
     with open(notebook_path, "w", encoding="utf-8") as f_out:
         json.dump(doc, f_out, indent=1, ensure_ascii=False)
+        f_out.write("\n")
 
+    print(f"Notebook {notebook_path} updated")
     return 1
+
+
+if __name__ == "__main__":
+    for filepath in sys.argv[1:]:
+        set_cell_id(Path(filepath))
