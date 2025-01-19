@@ -6,7 +6,7 @@ from uuid import uuid4
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from loguru import logger
-from sklearn.model_selection import learning_curve
+from sklearn.model_selection import StratifiedKFold, learning_curve
 from sklearn.pipeline import Pipeline
 
 from Backend.app.api.models import (
@@ -156,22 +156,20 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
         new_model = create_model(request.config)
         images, labels = load_colored_images_and_labels()
 
+        stratified_cv = StratifiedKFold(n_splits=3)
         curve = None
         if request.with_learning_curve:
-            try:
-                train_sizes, train_scores, test_scores = learning_curve(
-                    new_model,
-                    images,
-                    labels,
-                    cv=5,
-                    scoring="f1_macro",
-                    train_sizes=[0.3, 0.6, 0.9],
-                    error_score="raise",
-                )
-            except ValueError as e:
-                logger.error("Ошибка во время learning_curve: " + str(e))
-                train_sizes, train_scores, test_scores = [0], [[0]], [[0]]
-
+            train_sizes, train_scores, test_scores = learning_curve(
+                new_model,
+                images,
+                labels,
+                cv=stratified_cv,
+                scoring="f1_macro",
+                shuffle=True,
+                random_state=42,
+                train_sizes=[0.3, 0.6, 0.9],
+                error_score=0,
+            )
             curve = LearningCurveInfo(test_scores=test_scores, train_scores=train_scores, train_sizes=train_sizes)
 
         model_id = str(uuid4())
