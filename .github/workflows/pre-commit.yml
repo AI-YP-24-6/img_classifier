@@ -28,6 +28,6 @@ jobs:
       continue-on-error: true
 
     - name: Auto commit action
-      uses: stefanzweifel/git-auto-commit-action@v5
+      uses: stefanzweifel/git-auto-commit-action@v5.1.0
       with:
           commit_message: Apply pre-commit hooks auto-fix
