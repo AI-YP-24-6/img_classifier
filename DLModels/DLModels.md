@@ -12,7 +12,7 @@
 
 [Ноутбук с ResNet50](./ResNet50_model.ipynb)
 
-Была использована модель [ResNet50](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html), предобученая на датасете [ImageNet](https://www.image-net.org/)
+Была использована модель [ResNet50](https://docs.pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html), предобученная на датасете [ImageNet](https://www.image-net.org/)
 
 * Заменён последний слой `model.fc (fully connected)` на новый Linear, соответствующий количеству классов (32). <br>
 Таким образом, модель теперь возвращает выход размерности num_classes, а не стандартные 1000 классов из ImageNet
