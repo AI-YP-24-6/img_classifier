@@ -8,9 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from Backend.app.api.models import ModelType
 from Backend.app.api.v1.api_route import models, router_dataset, router_models
-
-# Импорт нужен для работы baseline
-from Backend.app.services.model_loader import load_model
+from Backend.app.services.model_loader import load_model  # Импорт нужен для работы baseline
 from Tools.logger_config import configure_server_logging
 
 
@@ -23,9 +21,9 @@ class Settings(BaseSettings):
         env_file="../../.env", env_file_encoding="utf-8", extra="ignore", env_ignore_empty=True
     )
     uvicorn_host: str = Field(
-        "127.0.0.1", validate_default=False, pattern="[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}"
+        default="127.0.0.1", validate_default=False, pattern="[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}"
     )
-    uvicorn_port: int = Field(54545, validate_default=False, lt=65535, ge=0)
+    uvicorn_port: int = Field(default=54545, validate_default=False, le=65535, ge=0)
     uvicorn_reload: bool = False
 
 
@@ -82,4 +80,10 @@ app.include_router(router_dataset)
 app.include_router(router_models)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=settings.uvicorn_host, port=settings.uvicorn_port, reload=settings.uvicorn_reload)
+    uvicorn.run(
+        "main:app",
+        host=settings.uvicorn_host,
+        port=settings.uvicorn_port,
+        reload=settings.uvicorn_reload,
+        log_config=None,
+    )

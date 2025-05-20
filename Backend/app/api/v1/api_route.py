@@ -54,7 +54,7 @@ router_dataset = APIRouter(prefix="/api/v1/dataset")
     description="Загрузка датасета",
 )
 async def load_dataset(
-    file: Annotated[UploadFile, File(..., description="Архив с классами изображений")]
+    file: Annotated[UploadFile, File(..., description="Архив с классами изображений")],
 ) -> DatasetInfo:
     """
     Загрузка датасета.
@@ -208,7 +208,7 @@ async def fit(request: Annotated[FitRequest, "Параметры для обуч
     description="Предсказание класса",
 )
 async def predict(
-    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]
+    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")],
 ) -> PredictionResponse:
     """
     Предсказание изображенного фрукта или овоща
@@ -233,7 +233,7 @@ async def predict(
     description="Предсказание класса с вероятностью",
 )
 async def predict_proba(
-    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")]
+    file: Annotated[UploadFile, File(..., description="Файл изображения для предсказания")],
 ) -> ProbabilityResponse:
     """
     Предсказание с вероятностью изображенного фрукта или овоща
