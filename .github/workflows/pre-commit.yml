@@ -25,10 +25,10 @@ jobs:
           python-version: '3.13'
 
     - name: Run pre-commit on codebase
-      uses: pre-commit/action@v3.0.1
+      uses: pre-commit/action@v3
       continue-on-error: true
 
     - name: Auto commit action
-      uses: stefanzweifel/git-auto-commit-action@v5.1.0
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
           commit_message: Apply pre-commit hooks auto-fix
