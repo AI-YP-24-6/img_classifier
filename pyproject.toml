@@ -15,12 +15,12 @@ jupyter = "~1.1.1"
 ipykernel = "~6.29.5"
 pandas = "~2.2.3"
 kaggle = "^1.6.17"
-scikit-image = "0.25.0"
+scikit-image = "0.25.2"
 matplotlib = "~3.10.0"
 seaborn = "^0.13.2"
 gdown = "^5.2.0"
 exif = "^1.6.1"
-plotly = "^5.24.1"
+plotly = "^6.1.0"
 notebook = "^7.2.2"
 uvicorn = "^0.34.0"
 fastapi = "^0.115.6"
@@ -39,19 +39,19 @@ streamlit-option-menu = "^0.4.0"
 
 
 [tool.poetry.group.linters.dependencies]
-pre-commit = "^4.0.1"
-pylint = "^3.3.3"
-flake8 = "^7.1.1"
-isort = "^5.13.2"
-black = "^24.10.0"
+pre-commit = "^4.2.0"
+pylint = "^3.3.7"
+flake8 = "^7.2.0"
+isort = "^6.0.1"
+black = "^25.1.0"
 pycodestyle = "^2.12.1"
 
 
 [tool.poetry.group.docs.dependencies]
-mkdocs-material = "~9.5.49"
-mkdocstrings = { extras = ["python"], version = "^0.27.0" }
+mkdocs-material = "~9.6.14"
+mkdocstrings = { extras = ["python"], version = "^0.29.1" }
 mkdocs-jupyter = "^0.25.1"
-griffe-typingdoc = "^0.2.7"
+griffe-typingdoc = "^0.2.8"
 
 [build-system]
 requires = ["poetry-core"]
