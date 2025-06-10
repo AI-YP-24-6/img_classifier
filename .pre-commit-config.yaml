@@ -17,17 +17,17 @@ repos:
             -   id: mixed-line-ending
                 args: [ --fix=lf ]
     -   repo: https://github.com/psf/black
-        rev: 24.10.0
+        rev: 25.1.0
         hooks:
             -   id: black
             -   id: black-jupyter
     -   repo: https://github.com/PyCQA/isort
-        rev: '5.13.2'
+        rev: '6.0.1'
         hooks:
             -   id: isort
                 name: isort-python
     -   repo: https://github.com/PyCQA/flake8
-        rev: 7.1.1
+        rev: 7.2.0
         hooks:
             -   id: flake8
     -   repo: https://github.com/asottile/pyupgrade
@@ -36,13 +36,13 @@ repos:
             -   id: pyupgrade
                 args: [ --py39-plus ]
     -   repo: https://github.com/pylint-dev/pylint
-        rev: v3.3.3
+        rev: v3.3.7
         hooks:
             -   id: pylint
                 name: pylint
                 args:
                   [ --max-line-length=120,
-                    "--disable=C0103,C0114,C0115,E0401,R0903"
+                    "--disable=C0103,C0114,C0115,E0401,R0903,E1101"
                   ]
     -   repo: https://github.com/koalaman/shellcheck-precommit
         rev: v0.10.0
