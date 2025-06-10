@@ -6,14 +6,14 @@ COPY Tools/ /workdir/Tools
 
 WORKDIR /workdir
 
-RUN apt-get update \
+RUN --mount=type=cache,target=/var/cache/apt \ apt-get update \
     && apt-get install -y libgl1-mesa-glx=22.3.6-1+deb12* libglib2.0-0=2.74.6-2+deb12* --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install --no-cache-dir poetry==1.8.* && \
     poetry config virtualenvs.create false && \
-    poetry install --without docs,linters --no-interaction --no-ansi &&\
+    poetry install --without docs,client,linters --no-interaction --no-ansi &&\
     rm -rf "$(poetry config cache-dir)/\{cache,artifacts\}"
 
 
