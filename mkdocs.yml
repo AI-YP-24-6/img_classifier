@@ -99,6 +99,17 @@ nav:
     -   MVP:
             -   Разработка API: api.md
             -   Разработка UI: ui.md
+
+    -   ML:
+            -   Разработка модели HOG: MLModels/HOG.md
+            -   Разработка модели ML: MLModels/ML_voting_model.md
+            -   Разработка модели SIFT: MLModels/SIFT.md
+            -   Обобщение: MLModels/ml_models.md
+    -   DL:
+            -   Разработка модели EfficientNet: DLModels/EfficientNet_model.md
+            -   Разработка модели ResNet: DLModels/ResNet50_model.md
+            -   Разработка модели Yolo: DLModels/Yolo_model.md
+            -   Обобщение: DLModels/DLModels.md
     -   Документация модулей:
             -   Tools: tools.md
             -   CI/CD: CI_CD.md
