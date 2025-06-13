@@ -86,23 +86,25 @@ plugins:
 nav:
     -   Начало: index.md
     -   Исследовательский анализ:
-            -   Сбор данных: eda/dataset.md
-            -   Парсинг: eda/parser.md
+            -   Сбор данных: EDA/dataset.md
+            -   Парсинг: EDA/parser.md
             -   Объединение датасетов: dataset.md
             -   Анализ данных:
-                    -   Анализ Fruits360: eda/EDA_Fruits360.md
-                    -   Анализ tasty_fruit: eda/EDA_tasty_fruit.md
-                    -   Анализ Vegetable Image Dataset: eda/EDA_Vegetables.md
-                    -   Анализ goskatalog_art: eda/goskatalog.ipynb
-                    -   Анализ объединенного датасета: eda/EDA.md
+                    -   Анализ Fruits360: EDA/EDA_Fruits360.md
+                    -   Анализ tasty_fruit: EDA/EDA_tasty_fruit.md
+                    -   Анализ Vegetable Image Dataset: EDA/EDA_Vegetables.md
+                    -   Анализ goskatalog_art: EDA/goskatalog.ipynb
+                    -   Анализ объединенного датасета: EDA/EDA.md
 
     -   MVP:
+            -   Работа сервиса: mvp.md
+            -   Запуск сервиса: cloudru.md
             -   Разработка API: api.md
             -   Разработка UI: ui.md
 
     -   ML:
             -   Разработка модели HOG: MLModels/HOG.md
-            -   Разработка модели ML: MLModels/ML_voting_model.md
+            -   Разработка модели ML_voting: MLModels/ML_voting_model.md
             -   Разработка модели SIFT: MLModels/SIFT.md
             -   Обобщение: MLModels/ml_models.md
     -   DL:
