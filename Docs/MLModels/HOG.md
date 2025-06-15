@@ -17,14 +17,14 @@ hide:
 - [Шаг 3: Настройка окружения и путей](#шаг-3-настройка-окружения-и-путей)
 - [Шаг 4: Загрузка и распаковка данных](#шаг-4-загрузка-и-распаковка-данных)
 - [Шаг 5: Подготовка функций для извлечения HOG-признаков](#шаг-5-подготовка-функций-для-извлечения-hog-признаков)
-- [Шаг 6: Извлечение и загрузка HOG-признаков](#шаг-6-извлечение-и-загрузка-hog-признаков)
-- [Шаг 7: Обучение и оценка SVC](#шаг-7-обучение-и-оценка-svc)
-- [Шаг 8: Обучение и оценка RandomForest](#шаг-8-обучение-и-оценка-randomforest)
-- [Шаг 9: Обучение и оценка LightGBM](#шаг-9-обучение-и-оценка-lightgbm)
-- [Шаг 10: Обучение и оценка CatBoost](#шаг-10-обучение-и-оценка-catboost)
+- [Шаг 6: Извлечение и загрузка HOG-признаков](#шаг-6-извлечение-и-загрузка-hog-признаков-из-изображений)
+- [Шаг 7: Обучение и оценка SVC](#шаг-7-обучение-и-оценка-svc-с-использованием-pca)
+- [Шаг 8: Обучение и оценка RandomForest](#шаг-8-обучение-и-оценка-randomforest-classifier-с-pca)
+- [Шаг 9: Обучение и оценка LightGBM](#шаг-9-обучение-и-оценка-lightgbm-classifier-с-pca)
+- [Шаг 10: Обучение и оценка CatBoost](#шаг-10-обучение-и-оценка-catboost-classifier-с-pca)
 - [Ключевые результаты](#ключевые-результаты)
 
-### Шаг 1: Установка зависимостей
+### Шаг 1: Установка зависимостей {#шаг-1-установка-зависимостей}
 *Цель шага*: Установка необходимых библиотек `catboost` и `lightgbm`.
 
 ```python
@@ -35,7 +35,7 @@ hide:
 **Результат**:
 > Библиотеки успешно установлены.
 
-### Шаг 2: Импорт библиотек
+### Шаг 2: Импорт библиотек  {#шаг-2-импорт-библиотек}
 *Цель шага*: Импорт всех необходимых модулей для обработки данных, извлечения признаков и машинного обучения.
 
 ```python
@@ -73,7 +73,7 @@ sns.set()
 from tqdm.auto import tqdm
 ```
 
-### Шаг 3: Настройка окружения и путей
+### Шаг 3: Настройка окружения и путей {#шаг-3-настройка-окружения-и-путей}
 *Цель шага*: Инициализация констант и определение путей к данным.
 
 ```python
@@ -100,7 +100,7 @@ ZIP_PATH = os.path.join(DRIVE_DIR, "dataset_32_classes_splitted.zip")
 os.makedirs(DATASET_DIR, exist_ok=True)
 ```
 
-### Шаг 4: Загрузка и распаковка данных
+### Шаг 4: Загрузка и распаковка данных {#шаг-4-загрузка-и-распаковка-данных}
 *Цель шага*: Загрузка датасета с Google Drive и его распаковка.
 
 ```python
@@ -119,7 +119,7 @@ with zipfile.ZipFile(ZIP_PATH, "r") as zip_ref:
 **Результат**:
 > Архив с изображениями загружен и распакован в папку `dataset`.
 
-### Шаг 5: Подготовка функций для извлечения HOG-признаков
+### Шаг 5: Подготовка функций для извлечения HOG-признаков {#шаг-5-подготовка-функций-для-извлечения-hog-признаков}
 *Цель шага*: Определение функций для извлечения HOG-признаков из изображений.
 
 ```python
@@ -170,7 +170,7 @@ def upload_colored_hog_features(color_space_code, pix_per_cell, cell_per_block):
     return np.array(X_train), np.array(X_test), np.array(y_train), np.array(y_test)
 ```
 
-### Шаг 6: Извлечение и загрузка HOG-признаков
+### Шаг 6: Извлечение и загрузка HOG-признаков из изображений {#шаг-6-извлечение-и-загрузка-hog-признаков-из-изображений}
 *Цель шага*: Вызов функции для извлечения признаков HOG из изображений. Используется цветовое пространство YCrCb.
 
 ```python
@@ -179,7 +179,7 @@ X_train_hog, X_test_hog, y_train, y_test = upload_colored_hog_features(cv2.COLOR
 **Результат**:
 > Признаки HOG извлечены для обучающей и тестовой выборок. Размерность `X_train_hog`: (1961, 1944), `X_test_hog`: (497, 1944).
 
-### Шаг 7: Обучение и оценка SVC
+### Шаг 7: Обучение и оценка SVC с использованием PCA {#шаг-7-обучение-и-оценка-svc-с-использованием-pca}
 *Цель шага*: Обучение и оценка модели Support Vector Classifier (SVC) с использованием PCA для уменьшения размерности.
 
 ```python
@@ -201,7 +201,7 @@ print(classification_report(y_test, pca_svc_best_pred))
 - **Базовая модель**: `accuracy` = 0.70, `f1-macro` = 0.70.
 - **Лучшая модель (C=10, kernel='rbf')**: `accuracy` = 0.76, `f1-macro` = 0.76.
 
-### Шаг 8: Обучение и оценка RandomForest
+### Шаг 8: Обучение и оценка RandomForest Classifier с PCA {#шаг-8-обучение-и-оценка-randomforest-classifier-с-pca}
 *Цель шага*: Обучение и оценка модели RandomForestClassifier с PCA.
 
 ```python
@@ -222,7 +222,7 @@ print(classification_report(y_test, pca_rf_best_pred))
 - **Базовая модель**: `accuracy` = 0.76, `f1-macro` = 0.76.
 - **Лучшая модель**: `accuracy` = 0.77, `f1-macro` = 0.77.
 
-### Шаг 9: Обучение и оценка LightGBM
+### Шаг 9: Обучение и оценка LightGBM Classifier с PCA {#шаг-9-обучение-и-оценка-lightgbm-classifier-с-pca}
 *Цель шага*: Обучение и оценка модели LGBMClassifier с PCA.
 
 ```python
@@ -243,7 +243,7 @@ print(classification_report(y_test, pca_lgbm_best_pred))
 - **Базовая модель**: `accuracy` = 0.74, `f1-macro` = 0.74.
 - **Лучшая модель**: `accuracy` = 0.78, `f1-macro` = 0.78.
 
-### Шаг 10: Обучение и оценка CatBoost
+### Шаг 10: Обучение и оценка CatBoost Classifier с PCA {#шаг-10-обучение-и-оценка-catboost-classifier-с-pca}
 *Цель шага*: Обучение и оценка модели CatBoostClassifier с PCA.
 
 ```python
@@ -264,20 +264,20 @@ print(classification_report(y_test, pca_cat_best_pred))
 - **Базовая модель**: `accuracy` = 0.76, `f1-macro` = 0.76.
 - **Лучшая модель**: `accuracy` = 0.79, `f1-macro` = 0.79.
 
-## Ключевые результаты
+## Ключевые результаты {#ключевые-результаты}
 В данном исследовании были протестированы различные ML-модели для классификации изображений с использованием HOG-признаков. Наилучшие результаты показала модель CatBoost после подбора гиперпараметров.
 
 ### Таблица результатов
-|Модель|Гиперпараметры|accuracy|f1-macro|
-|:----:|:----:|:----:|:----:|
-|SVC+PCA|n_components=0.6|0.70|0.70|
-|SVC+PCA|n_components=0.6, C=10, kernel='rbf'|0.76|0.76|
-|RandomForest+PCA|n_components=0.6|0.76|0.76|
-|RandomForest+PCA|n_components=0.6, criterion='entropy', max_depth=None, max_features='sqrt', n_estimators=500|0.77|0.77|
-|LightGBM+PCA|n_components=0.6|0.74|0.74|
-|LightGBM+PCA|n_components=0.6, min_child_samples=12, num_leaves=60, reg_alpha=2.88e-05, reg_lambda=2.44e-08|0.78|0.78|
-|CatBoost+PCA|n_components=0.6|0.76|0.76|
-|CatBoost+PCA|n_components=0.6, depth=10, learning_rate=0.1, min_child_samples=44, reg_lambda=0.0517|**0.79**|**0.79**|
+|      Модель      |                                         Гиперпараметры                                         | accuracy | f1-macro |
+|:----------------:|:----------------------------------------------------------------------------------------------:|:--------:|:--------:|
+|     SVC+PCA      |                                        n_components=0.6                                        |   0.70   |   0.70   |
+|     SVC+PCA      |                              n_components=0.6, C=10, kernel='rbf'                              |   0.76   |   0.76   |
+| RandomForest+PCA |                                        n_components=0.6                                        |   0.76   |   0.76   |
+| RandomForest+PCA |  n_components=0.6, criterion='entropy', max_depth=None, max_features='sqrt', n_estimators=500  |   0.77   |   0.77   |
+|   LightGBM+PCA   |                                        n_components=0.6                                        |   0.74   |   0.74   |
+|   LightGBM+PCA   | n_components=0.6, min_child_samples=12, num_leaves=60, reg_alpha=2.88e-05, reg_lambda=2.44e-08 |   0.78   |   0.78   |
+|   CatBoost+PCA   |                                        n_components=0.6                                        |   0.76   |   0.76   |
+|   CatBoost+PCA   |     n_components=0.6, depth=10, learning_rate=0.1, min_child_samples=44, reg_lambda=0.0517     | **0.79** | **0.79** |
 
 - **Вывод**: CatBoost с настроенными параметрами (`depth=10`, `learning_rate=0.1` и др.) и PCA (`n_components=0.6`) достиг наивысшей точности **79%**.
 - Использование PCA с сохранением 60% дисперсии позволило значительно сократить время обучения без существенной потери качества.

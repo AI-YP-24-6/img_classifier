@@ -36,8 +36,8 @@ ___
 
 Исследовательский анализ данных:
 
-* [сбор данных](eda/dataset.md)
-* [парсинг](eda/parser.md)
+* [сбор данных](EDA/dataset.md)
+* [парсинг](EDA/parser.md)
 
 ## Project layout
 
@@ -70,6 +70,8 @@ ___
 │    ├── baseline_ResNet18.ipynb
 │    ├── baseline_SIFT.ipynb
 │    └── baseline_Vgg16.ipynb
+├── DLModels                            # baseline DLModels
+├── MLModels                            # baseline MLModels
 ├── Client                              # streamlit app
 │    ├── app_client.py                  # основной файл приложения
 │    ├── eda_page.py                    # файл отображения статистики модели
@@ -77,7 +79,7 @@ ___
 │    ├── model_training_page.py         # код для подготовки модели
 │    └── run.py                         # файл для запуска streamlit
 ├── Docs                                # документация
-│    ├── eda                            # документация по EDA
+│    ├── EDA                            # документация по EDA
 │    └── img                            # изображения для документации
 ├── EDA
 │    ├── EDA.md                     # Краткое описание EDA объединенного датасета
