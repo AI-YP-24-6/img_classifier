@@ -29,7 +29,8 @@ jobs:
       - name: Run hadolint
         run: |
            cat *.Dockerfile | docker run --rm -i hadolint/hadolint > lint-report.txt
-           cat compose.yaml | docker run --rm -i hadolint/hadolint >> lint-report.txt
+        # cat compose.yaml | docker run --rm -i hadolint/hadolint >> lint-report.txt
+        # doesn't work: https://github.com/hadolint/hadolint/issues/1091
         continue-on-error: true
 
       - name: Limit report to 100 lines
